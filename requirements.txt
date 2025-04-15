@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+requests
+rich
+typer
+pytest
+prompt_toolkit
+pyyaml
+pydantic
