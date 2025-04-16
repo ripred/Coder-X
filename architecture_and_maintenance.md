@@ -11,6 +11,18 @@
 - This refactor improves maintainability, enables future features (validation, import/export, remote sync), and simplifies both CLI and API integration.
 - Documentation and architecture updated to reflect new design.
 
+#### Unified Configuration and Testing Philosophy
+- All configuration logic must be unified between runtime and tests: the same config file must be accepted and produce the same results in both cases.
+- Tests must exercise real, production code paths (not mocks or stubs) for configuration loading, saving, and CLI/API interaction.
+- If the config loader or CLI/API code falls back to defaults, overwrites fields, or ignores valid files, this is a bug and must be refactored.
+- Coverage and correctness are prioritized over "passing" tests.
+
+#### Maintenance/Tracking
+- [ ] **Config Loader and Test Unification Audit/Refactor**
+  - Audit and refactor the config loader and CLI/API code to ensure the same config file works identically in both runtime and test contexts.
+  - Update tests to use real config logic, not mocks, and to fail fast on config errors.
+  - Document all changes and rationale here and in plan.md.
+
 #### Environment Variables
 
 | Variable                  | Default                             | Description                                      |

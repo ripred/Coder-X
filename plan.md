@@ -54,6 +54,26 @@ Develop a Python-based, agentic coding assistant inspired by Anthropic’s Claud
 
 ---
 
+## Testing and Configuration Philosophy
+
+- All tests must exercise real, production code paths (not just mocks or stubs).
+- Features must work the same way at runtime and in tests—tests should not bypass or mock out core logic.
+- Configuration loading and saving must be unified: the same config file must work identically in both runtime and test contexts.
+- If the config loader or CLI/API code falls back to defaults or overwrites fields, this must be refactored so that valid files are always honored as-is.
+- Coverage and test quality are prioritized over simply "passing" tests.
+
+---
+
+## Tracked Steps: In Progress
+
+- [ ] **Config Loader and Test Unification Audit/Refactor**
+  - Audit the config loader and CLI/API code to ensure that config files are loaded and saved identically in both runtime and testing.
+  - Refactor as needed to prevent silent overwrites, unwanted defaulting, or schema mismatches.
+  - Update tests to use real config logic, not mocks, and to fail fast on config errors.
+  - Document the audit and refactor in plan.md and architecture_and_maintenance.md.
+
+---
+
 ## Basic Features: Status Summary
 
 All core features (model management, storage, shell integration, config, session/history, user management, MCP, API key management, file operations) are now implemented, tested, and documented. Unit tests cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md.
