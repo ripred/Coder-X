@@ -7,7 +7,7 @@
 **These rules MUST be followed for every feature, bugfix, and code change. They are non-negotiable and are critical for project health and AI-assist reliability.**
 
 1. **Documentation & Tracking**
-   - `plan.md`, `architecture_and_maintenance.md`, `requirements.txt`, and all other project, bug tracking, and feature tracking files MUST be kept up to date with every significant change or success.
+   - `plan.md`, `architectureCODER_X_maintenance.md`, `requirements.txt`, and all other project, bug tracking, and feature tracking files MUST be kept up to date with every significant change or success.
    - When a feature or bug is completed, immediately update all relevant documentation and remove obsolete/completed issues from tracking files.
    - Never leave documentation or tracking out of sync with the actual codebase.
 
@@ -145,7 +145,7 @@ Coder-X is well on its way to achieving parity with Anthropic's Claude Code, wit
 
 ## Basic Features: Status Summary
 
-All core features (model management, storage, shell integration, config, session/history, user management, MCP, key management, file operations) are now implemented, tested, and documented. Unit tests (see test_cli_new.py and other current tests) cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md. Legacy and redundant tests have been removed for clarity.
+All core features (model management, storage, shell integration, config, session/history, user management, MCP, key management, file operations) are now implemented, tested, and documented. Unit tests (see test_cli_new.py and other current tests) cover all validation and error-handling logic. Documentation is up to date in plan.md and architectureCODER_X_maintenance.md. Legacy and redundant tests have been removed for clarity.
 
 ---
 
@@ -248,7 +248,7 @@ All core features (model management, storage, shell integration, config, session
 - The project will not proceed to the next step until all tests pass.
 - **Before running any test that downloads or uses a local model, always prompt the user to select which volume to use for model storage to avoid disk space issues or using the wrong drive.**
 - **Defer the implementation and testing of local model downloading/storage until after remote/free/no-API-key model functionality is implemented and tested successfully.**
-- **For each section and step (and its unit test(s)), an accurate section must be added to architecture_and_maintenance.md describing how the step is accomplished. This document must be updated at the same rate as steps are implemented and tested.**
+- **For each section and step (and its unit test(s)), an accurate section must be added to architectureCODER_X_maintenance.md describing how the step is accomplished. This document must be updated at the same rate as steps are implemented and tested.**
 - **All code stubs (placeholders, stub functions/classes, and TODOs) must be fully implemented and tested before the project is considered complete. Stub removal is a tracked deliverable.**
 
 ---
@@ -310,7 +310,7 @@ All core features (model management, storage, shell integration, config, session
 - [ ] Refactor CLI to render all input/output inside a persistent frame using rich.
 - [ ] Refactor interactive shell to use rich framing for all prompts and outputs.
 - [ ] Add integration/system tests to ensure all shell/CLI output and input is always inside a frame.
-- [ ] Document the framing behavior and test requirements in architecture_and_maintenance.md.
+- [ ] Document the framing behavior and test requirements in architectureCODER_X_maintenance.md.
 - [ ] Mark as required for all future features and output improvements.
 
 ## Remaining Steps for Project Completion

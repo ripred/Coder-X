@@ -86,8 +86,6 @@ pytest
 | `CODER_X_KEY`             | `~/.coder_x_key`                    | (Reserved for future use. Not currently used.)   |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
-*For backward compatibility, the previous `CLAUDE_CODE_*` environment variables are still supported (for config, history, and model API only), but will be removed in a future release.*
-
 *Most environment variables are optional; defaults are used if unset.*
 
 ---

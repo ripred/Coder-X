@@ -32,7 +32,6 @@ Coder-X supports advanced customization via environment variables. Defaults are 
 | `CODER_X_KEY (reserved for future use, not currently active)` | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
-**Note:** Backward compatibility for `CLAUDE_CODE_*` environment variables is temporary and will be removed in a future release. Please update your configurations to use the `CODER_X_*` prefix.
 
 ---
 
