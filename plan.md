@@ -26,7 +26,7 @@
 ## Project Goal & Approach
 
 **Goal:**  
-Develop a Python-based, agentic coding assistant. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both local and remote models (e.g., Ollama), allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
+Develop a Python-based, agentic coding assistant modeled after Anthropic's Claude Code. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both local and remote models (e.g., Ollama), allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
 
 **Approach:**  
 - Use Python with CLI for the backend.
@@ -36,6 +36,55 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 - Allow secure key management.
 - Enable model storage on any user-selected location (internal or external drives).
 - Modular, extensible, and well-documented codebase.
+
+---
+
+### Claude Code Parity & Feature Comparison
+
+**Current Status:**
+- Coder-X implements the core features of Claude Code: interactive CLI, one-off queries, scriptable output, unified configuration, model selection, session/history management, and secure key management.
+- Documentation, onboarding, and test coverage are strong.
+
+**Notable Parity Achievements:**
+- Interactive REPL and scripting
+- Unified config management (Pydantic, Typer)
+- Model selection/configuration (Ollama/local/remote)
+- Session/history and secure key management
+- Modular, extensible subsystems
+- Project initialization and onboarding docs
+
+**Partial or Missing Features (Compared to Claude Code):**
+- Slash command system (e.g., /clear, /doctor, /help, etc.)
+- Full Model Context Protocol (MCP) integration
+- Usage/cost tracking and reporting
+- Health check/doctor command
+- Bug reporting from CLI
+- Project initialization as a command (/init)
+- Memory file editing via CLI
+- PR/comments/code review integration
+- Terminal/editor integration (key bindings, vim mode)
+- Auto-update mechanism
+
+---
+
+### Roadmap to Full Parity
+
+To match the full feature set and experience of Claude Code, prioritize:
+1. Implementing a robust slash command system for in-session runtime actions.
+2. Completing MCP integration for project/user/global memory sharing.
+3. Adding usage/cost tracking and reporting.
+4. Introducing a health check/doctor CLI command.
+5. Enabling bug reporting from the CLI.
+6. Creating a project initialization command (/init) for onboarding.
+7. Supporting memory file editing through the CLI.
+8. Integrating with PR/comments and code review tools.
+9. Adding terminal/editor integration features.
+10. Providing an update mechanism for Coder-X.
+
+---
+
+**Summary:**  
+Coder-X is well on its way to achieving parity with Anthropic's Claude Code, with all core features implemented and a clear roadmap for closing remaining gaps. This plan ensures Coder-X remains robust, user-friendly, and competitive as an agentic coding assistant.
 
 ---
 
