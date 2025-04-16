@@ -29,11 +29,19 @@ Coder-X supports advanced customization via environment variables. Defaults are 
 | `CODER_X_YAML_CONFIG`     | `~/.coder_x_config.yaml`            | Path to YAML config file (if used)               |
 | `HOME`                    | System user home                    | Used for default config/model/history locations   |
 | `CODER_X_HISTORY`         | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CODER_X_KEY (reserved for future use, not currently active)` | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
+| `CODER_X_KEY`             | `~/.coder_x_key.enc`                | Encrypted CLI/API key file (see below).         |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
 
 ---
+
+## Encrypted CLI/API Key Storage
+
+- Coder-X uses `app/key_encryption.py` for secure storage of CLI key encryption system: CLI/API keys are encrypted using PBKDF2HMAC (SHA256, 390,000 iterations) for key derivation and Fernet (AES) for authenticated encryption. The implementation includes robust error handling for corrupted or invalid files, and comprehensive unit tests for all critical paths. Blank passphrases are allowed for onboarding, but future enforcement of non-empty passphrases is planned. salt are stored in a binary file (default: `~/.coder_x_key.enc`).
+- Users must supply a passphrase to encrypt/decrypt secrets; if lost, the key cannot be recovered.
+- All error cases (corrupted/short files, wrong passphrase) are handled with clear exceptions.
+
+See the module and README for usage and security notes.
 
 ## 2. Testing Philosophy
 

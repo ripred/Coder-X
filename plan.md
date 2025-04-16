@@ -14,7 +14,7 @@
 2. **Testing Discipline**
    - Every new feature, bugfix, or refactor MUST include at least one relevant unit test.
    - Unit tests must always exercise real, production code paths (not just mocks or stubs).
-   - After any change, **run all unit tests** (not just the tests for the current feature) to ensure nothing is broken.
+   - After any change, **run all unit tests** to ensure nothing is broken.
    - Do not proceed to the next step until all tests are passing at 100%.
 
 3. **Commit & Push Policy**
@@ -38,6 +38,14 @@ Develop a Python-based, agentic coding assistant modeled after Anthropic's Claud
 - Modular, extensible, and well-documented codebase.
 
 ---
+
+### Encrypted CLI/API Key Storage
+
+- Coder-X now uses `app/key_encryption.py` for secure CLI/API key storage.
+- All secrets are encrypted using PBKDF2HMAC key derivation and Fernet (AES) encryption.
+- Encrypted secrets are stored in `~/.coder_x_key.enc`.
+- If the passphrase is lost, keys cannot be recovered (must re-create).
+- Comprehensive unit tests cover encryption, decryption, file handling, and error cases.
 
 ### Coder-X Parity & Feature Comparison
 
