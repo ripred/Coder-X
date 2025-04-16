@@ -1,4 +1,4 @@
-# Claude Code Python Assistant
+# Coder-X Python Assistant
 
 ## Architecture and Maintenance
 
@@ -32,7 +32,7 @@
 
 These environment variables allow advanced users and deployers to customize configuration, model management, and security. Most are optional and have safe defaults.
 
-This document provides a detailed, step-by-step breakdown of the architecture, implementation, and maintenance practices for each subsystem and feature of the Claude Code Python Assistant. It is updated in lockstep with development and testing.
+This document provides a detailed, step-by-step breakdown of the architecture, implementation, and maintenance practices for each subsystem and feature of the Coder-X Python Assistant. It is updated in lockstep with development and testing.
 
 ---
 

@@ -2,6 +2,14 @@
 
 A Python Agentic Coding Assistant with CLI and API, supporting configuration management, model management, and secure shell/file operations.
 
+## Workflow Discipline
+
+This project adheres to a strict workflow discipline to ensure maintainability, reliability, and quality:
+
+* Always keep documentation up to date with the latest changes and features.
+* Always require and run tests for every change, no matter how small.
+* Always commit and push changes after all tests have passed.
+
 ## Features
 - CLI and interactive shell (Typer-based)
 - FastAPI backend with REST endpoints

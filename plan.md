@@ -1,9 +1,32 @@
-# Claude Code Python Assistant - Project Plan
+# Coder-X Python Agentic Coding Assistant - Project Plan
+
+---
+
+## 🛑 Primary Project Rules & Workflow Discipline
+
+**These rules MUST be followed for every feature, bugfix, and code change. They are non-negotiable and are critical for project health and AI-assist reliability.**
+
+1. **Documentation & Tracking**
+   - `plan.md`, `architecture_and_maintenance.md`, `requirements.txt`, and all other project, bug tracking, and feature tracking files MUST be kept up to date with every significant change or success.
+   - When a feature or bug is completed, immediately update all relevant documentation and remove obsolete/completed issues from tracking files.
+   - Never leave documentation or tracking out of sync with the actual codebase.
+
+2. **Testing Discipline**
+   - Every new feature, bugfix, or refactor MUST include at least one relevant unit test.
+   - Unit tests must always exercise real, production code paths (not mocks/stubs).
+   - After any change, **run all unit tests** (not just the tests for the current feature) to ensure nothing is broken.
+   - Do not proceed to the next step until all tests are passing at 100%.
+
+3. **Commit & Push Policy**
+   - Once all tests are passing after a change, immediately commit all changes locally and push to the remote repository.
+   - Never leave uncommitted changes or failing tests in the working directory.
+
+---
 
 ## Project Goal & Approach
 
 **Goal:**  
-Develop a Python-based, agentic coding assistant inspired by Anthropic’s Claude Code CLI. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both remote (Claude/Anthropic) and local (Ollama, etc.) models, allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
+Develop a Python-based, agentic coding assistant. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both remote and local models (e.g., Ollama), allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
 
 **Approach:**  
 - Use Python with FastAPI and uvicorn for the backend.
