@@ -47,6 +47,66 @@ def test_set_model_storage_path(monkeypatch, tmp_path):
 from unittest import mock
 import errno
 
+# --- Additional edge/error case tests ---
+def test_list_ollama_models_error(monkeypatch):
+    mm = ModelManager()
+    # Simulate subprocess.run raising
+    monkeypatch.setattr("subprocess.run", lambda *a, **kw: (_ for _ in ()).throw(Exception("fail")))
+    assert mm.list_ollama_models() == []
+    # Simulate subprocess.run returning bad output
+    class DummyResult:
+        stdout = "bad\noutput"
+    monkeypatch.setattr("subprocess.run", lambda *a, **kw: DummyResult())
+    assert mm.list_ollama_models() == ["output"]
+
+def test_load_model_ollama_nonzero(monkeypatch):
+    mm = ModelManager()
+    class DummyResult:
+        returncode = 1
+    monkeypatch.setattr("subprocess.run", lambda *a, **kw: DummyResult())
+    assert not mm.load_model_ollama("foo")
+
+def test_unload_model_ollama_nonzero(monkeypatch):
+    mm = ModelManager()
+    class DummyResult:
+        returncode = 1
+    monkeypatch.setattr("subprocess.run", lambda *a, **kw: DummyResult())
+    assert not mm.unload_model_ollama("foo")
+
+def test_list_ollama_volumes_edge(monkeypatch, tmp_path):
+    mm = ModelManager()
+    # Simulate no extra volumes
+    monkeypatch.setattr("os.path.exists", lambda p: False)
+    vols = mm.list_ollama_volumes()
+    assert isinstance(vols, list)
+    # Simulate all mount directories exist but are empty
+    monkeypatch.setattr("os.path.exists", lambda p: True)
+    monkeypatch.setattr("os.listdir", lambda p: [])
+    vols = mm.list_ollama_volumes()
+    assert isinstance(vols, list)
+
+def test_set_active_model_minimal_config(monkeypatch):
+    class DummyConf:
+        model_storage_path = "/tmp"
+    mm = ModelManager(DummyConf())
+    monkeypatch.setattr("app.model_management.set_config_key", lambda c, k, v: c)
+    monkeypatch.setattr("app.config.save_config", lambda c: None)
+    mm.set_active_model("foo")
+    assert hasattr(mm, "config")
+
+def test_set_model_storage_path_minimal(monkeypatch, tmp_path):
+    mm = ModelManager()
+    p = str(tmp_path / "new")
+    monkeypatch.setattr("os.path.exists", lambda path: False)
+    monkeypatch.setattr("os.makedirs", lambda path, exist_ok: None)
+    monkeypatch.setattr("os.access", lambda path, mode: True)
+    class DummyDU: total=10**12; used=0; free=10**12
+    import shutil
+    monkeypatch.setattr(shutil, "disk_usage", lambda path: (DummyDU.total, DummyDU.used, DummyDU.free))
+    monkeypatch.setattr("app.model_management.set_config_key", lambda c, k, v: c)
+    monkeypatch.setattr("app.config.save_config", lambda c: None)
+    mm.set_model_storage_path(p)
+
 # --- Additional tests for storage path validation ---
 def test_set_model_storage_path_non_writable(tmp_path):
     mm = ModelManager()

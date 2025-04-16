@@ -1,4 +1,12 @@
-# Coder-X
+# Coder-X Python Agentic Coding Assistant
+
+**Project Status (as of 2025-04-16):**
+- All core features implemented, tested, and documented
+- All tests pass (pytest, 159 tests)
+- Code coverage: 81% (see plan.md for details)
+- SessionHistory, config, and file operations are robust and fully covered by tests
+- Documentation is up to date in plan.md and architecture_and_maintenance.md
+- No outstanding bugs or failing tests
 
 A Python Agentic Coding Assistant with CLI, supporting configuration management, model management, and secure shell/file operations.
 

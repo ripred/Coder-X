@@ -77,6 +77,10 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 
 ---
 
+- Once tests pass, clean up the test code and update documentation as needed.
+
+---
+
 ## Testing and Configuration Philosophy
 
 - All tests must exercise real, production code paths (not just mocks or stubs).

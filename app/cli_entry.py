@@ -125,8 +125,8 @@ def feedback(text: str = typer.Argument(..., help="Feedback text")):
 @app.command()
 def integration(action: str = typer.Argument(..., help="Action: list, connect, disconnect"), svc: str = typer.Argument(None, help="Service name")):
     """Manage integrations."""
-    from app.third_party_integrations import IntegrationManager
-    mgr = IntegrationManager()
+    from app.third_party_integrations import ThirdPartyIntegration
+    mgr = ThirdPartyIntegration()
     if action == "list":
         integrations = mgr.list_integrations()
         typer.echo("Available integrations:")

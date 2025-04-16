@@ -62,14 +62,16 @@ class FileOps:
         try:
             import requests
             endpoint = os.environ.get("CLAUDE_CODE_MODEL_API", "http://localhost:8000/remote-model/generate")
-            resp = requests.post(endpoint, json={"prompt": f"Explain the following code in detail:\n{content[:4000]}"})
+            resp = requests.post(endpoint, json={"input": content, "mode": "explain"}, timeout=15)
             if resp.status_code == 200:
-                data = resp.json()
-                return data.get("output", "[No explanation returned]")
+                result = resp.json().get("result")
+                if result:
+                    return f"[EXPLAIN] {filepath}:\n{result}"
         except Exception:
             pass
-        # Fallback: return a simple summary
-        return f"[EXPLAIN] {filepath}:\n{content[:200]}..."
+        # fallback summary
+        summary = f"[EXPLAIN] {filepath}:\n{content[:200]}...\nSummary: {len(content.splitlines())} lines, {len(content)} chars."
+        return summary
 
     def run_tests(self, test_path: str) -> str:
         import subprocess

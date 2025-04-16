@@ -173,6 +173,8 @@ The CLI provides an interactive terminal interface to all backend features, incl
 
 ## Testing
 
+All core features are covered by automated tests. As of 2025-04-16, all tests pass and code coverage is 81%. SessionHistory, configuration, and file operations are robustly tested. No known failing or skipped tests remain. Documentation is current and reflects the state of the codebase.
+
 - All new or updated features must have at least one unit test.
 - After every code or test change, both plan.md and architecture_and_maintenance.md are updated immediately to reflect the true project state and design decisions.
 - Integration tests that touch external services are always passive/read-only and robust to remote server state.

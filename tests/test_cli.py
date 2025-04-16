@@ -90,3 +90,12 @@ def test_run_command_line_model_missing_args():
 def test_run_command_line_config_missing_args():
     result = cli.run_command_line("config")
     assert result is None or "Unknown command" in str(result)
+
+# --- Only supported commands are tested below ---
+def test_run_command_line_unknown_command():
+    # All unsupported commands should return unknown command message
+    for cmd in [
+        "file read foo.txt", "shell echo hi", "history show", "user info", "feedback awesome", "integration list", "mcp get-server"
+    ]:
+        result = cli.run_command_line(cmd)
+        assert "Unknown command" in str(result)
