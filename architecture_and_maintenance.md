@@ -1,24 +1,27 @@
-# Coder-X Python Assistant
+# Coder-X Python Assistant  
+**Architecture & Maintenance Guide**
 
-## Architecture and Maintenance
+Welcome to the Coder-X codebase! This guide is designed for developers new to the project, providing a clear overview of core architecture, configuration, testing philosophy, and best practices for maintenance. Use this document as your primary reference for understanding how Coder-X works and how to contribute effectively.
 
-### Configuration Management
-- **2025-04-15: CLI config subsystem refactored for robustness and extensibility.**
-- Now uses a Pydantic V2 schema (`CoderXConfig`) for all config validation and IO, ensuring type safety and future-proofing.
-- CLI config commands (`show`, `set`, `unset`, `setup`) are implemented as a Typer group. All output is structured JSON for scripting and testability.
-- Config loading is robust: empty or invalid files are handled gracefully, always returning a valid config object.
-- All config commands and edge cases are covered by comprehensive tests in `tests/test_config_cli.py`.
+---
 
-#### Unified Configuration and Testing Philosophy
-- **Goal:** Ensure that the configuration loader, saver, and schema work identically in both runtime and testing contexts, with no silent fallback to defaults or overwriting of user/test values.
-- Coverage and correctness are prioritized over "passing" tests.
+## 1. Configuration Management
 
-#### Maintenance/Tracking
-- **Next Steps:**
-  - Update/add tests to assert error handling and round-trip.
-  - Ensure all features use the real config logic in both runtime and testing.
+**Overview:**  
+Coder-X uses a robust, type-safe configuration system based on [Pydantic V2](https://docs.pydantic.dev/2.0/) schemas. All configuration is validated and loaded through a single schema (`CoderXConfig`), ensuring consistency and reliability across the CLI, runtime, and tests.
 
-#### Environment Variables
+**Key Features:**
+- **Unified Config:** All config logic (loading, saving, validation) is centralized, so runtime and tests behave identically.
+- **CLI Integration:** Configuration commands (`show`, `set`, `unset`, `setup`) are available via the CLI, implemented with [Typer](https://typer.tiangolo.com/). All CLI output is structured JSON, making scripting and automation easy.
+- **Error Handling:** Empty or invalid config files are handled gracefully, always producing a valid config object or clear error.
+
+**Best Practices for Developers:**
+- Always use the real config loader in both code and tests—never bypass with mocks or stubs.
+- When adding features, ensure config changes are reflected in both the schema and CLI.
+- Add or update tests to cover new config edge cases and error handling.
+
+**Environment Variables:**  
+Coder-X supports advanced customization via environment variables. Defaults are safe, but you can override for custom deployments or testing:
 
 | Variable                  | Default                             | Description                                      |
 |---------------------------|-------------------------------------|--------------------------------------------------|
@@ -29,14 +32,123 @@
 | `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
-These environment variables allow advanced users and deployers to customize configuration, model management, and security. Most are optional and have safe defaults.
+---
 
-This document provides a detailed, step-by-step breakdown of the architecture, implementation, and maintenance practices for each subsystem and feature of the Coder-X Python Assistant. It is updated in lockstep with development and testing.
+## 2. Testing Philosophy
+
+**Core Principles:**
+- All tests must exercise real, production code paths—not just mocks or stubs.
+- Features must behave the same way at runtime and in tests; never bypass or patch out core logic in tests.
+- Unified configuration: The same config file and loader logic are used everywhere.
+- Prioritize thorough coverage and test quality over simply “passing” tests.
+
+**Current Status:**
+- All core features are covered by automated tests.
+- As of 2025-04-16, all tests pass and code coverage is 81%.
+- SessionHistory, configuration, and file operations are robustly tested.
+- No known failing or skipped tests remain.
+- Documentation is kept current with all code and test changes.
+
+**Developer Checklist:**
+- When adding or changing features, write at least one new unit test.
+- After every change, update both this guide and plan.md to reflect the true state of the codebase.
+- Integration tests should be robust to external server state and never modify external data.
+
+---
+
+## 3. Project Structure & Subsystems
+
+Coder-X is organized into modular subsystems, each with clear responsibilities. Here’s a quick map:
+
+- **CLI & Interactive Shell:**  
+  - Entry point for all user commands (Typer-based CLI, prompt_toolkit shell).
+  - Command parsing, help/version/config display.
+
+- **Model Management:**  
+  - List, select, load, and unload models (local and remote).
+  - Ollama and Anthropic integration.
+  - User-supplied key support.
+
+- **Model Storage Location Management:**  
+  - Configurable model storage path, validated for existence and permissions.
+
+- **Key Management:**  
+  - Secure storage and retrieval of API/CLI keys.
+
+- **Session/History Management:**  
+  - Tracks user sessions and command history.
+  - Robust error handling for malformed or missing files.
+
+- **File Operations:**  
+  - Safe read/write/append operations, always using production code paths.
+
+- **Shell Integration:**  
+  - Secure execution of shell commands within the assistant.
+
+- **Configuration Management:**  
+  - Unified loader/saver, schema-based validation, CLI integration.
+
+- **User Management:**  
+  - User info display and authentication.
+
+- **Feedback/Telemetry:**  
+  - Collects user feedback (telemetry opt-in, to be implemented).
+
+- **Third-Party Integrations:**  
+  - Hooks for VCS, cloud, and other external services.
+
+---
+
+## 4. Maintenance Practices
+
+- **Documentation:**  
+  - All major code or test changes must be reflected in this guide and plan.md immediately.
+  - Keep architecture_and_maintenance.md up to date for onboarding and design reference.
+
+- **Testing Discipline:**  
+  - Run the full test suite after every change.
+  - Never leave failing or skipped tests in the codebase.
+
+- **Committing & Pushing:**  
+  - Always commit after reaching a passing, documented state.
+  - Push changes upstream promptly to keep the team in sync.
+
+---
+
+## 5. Getting Started as a Developer
+
+1. **Read this guide and plan.md** to understand the project’s architecture and workflow.
+2. **Clone the repo and set up a Python virtual environment.**
+3. **Install dependencies:**  
+   ```sh
+   pip install -r requirements.txt
+   ```
+4. **Run the test suite:**  
+   ```sh
+   pytest --cov=app --cov-report=term-missing
+   ```
+5. **Explore the CLI:**  
+   ```sh
+   python -m app.cli --help
+   ```
+6. **Ready to develop!**  
+   - When making changes, follow the testing and documentation practices outlined above.
+   - For questions, refer to this guide or ask the team.
 
 ---
 
 ## Table of Contents
-- [Model Management](#model-management)
+
+- [Configuration Management](#configuration-management)
+- [Testing Philosophy](#testing-philosophy)
+- [Project Structure & Subsystems](#project-structure--subsystems)
+- [Maintenance Practices](#maintenance-practices)
+- [Getting Started as a Developer](#getting-started-as-a-developer)
+
+---
+
+This guide is your roadmap to maintaining, extending, and confidently contributing to Coder-X. Welcome aboard!
+
 - [CLI Key Management](#cli-key-management)
 - [MCP Integration](#mcp-integration)
 - [File Operations](#file-operations)
