@@ -92,7 +92,7 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 
 ## Basic Features: Status Summary
 
-All core features (model management, storage, shell integration, config, session/history, user management, MCP, API key management, file operations) are now implemented, tested, and documented. Unit tests cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md.
+All core features (model management, storage, shell integration, config, session/history, user management, MCP, API key management, file operations) are now implemented, tested, and documented. Unit tests (see test_cli_new.py and other current tests) cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md. Legacy and redundant tests have been removed for clarity.
 
 ---
 

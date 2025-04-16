@@ -33,7 +33,7 @@ This project adheres to a strict workflow discipline to ensure maintainability, 
 
 3. **Use the CLI:**
    ```sh
-   python app/cli_entry.py --help
+   python app/test_cli_new.py --help
    ```
 
 ## Testing
