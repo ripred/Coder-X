@@ -21,7 +21,7 @@ def test_update_config(monkeypatch, tmp_path):
     orig = CoderXConfig(
         model="test_model",
         model_storage_path="/tmp/models",
-        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy").model_dump(),
+        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy"),
         mcp_server="http://localhost:1234",
         history_path="/tmp/history.json"
     )
@@ -30,4 +30,6 @@ def test_update_config(monkeypatch, tmp_path):
     assert resp.json()["success"]
     # Confirm persisted
     loaded = load_config(str(config_path))
+    print(f"[DEBUG] test_update_config: config_path={config_path}")
+    print(f"[DEBUG] Loaded config: {loaded}")
     assert loaded.model == "test_model"

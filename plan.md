@@ -66,13 +66,6 @@ Develop a Python-based, agentic coding assistant inspired by Anthropic’s Claud
 
 ## Tracked Steps: In Progress
 
-- [ ] **Config Loader and Test Unification Audit/Refactor**
-  - Audit the config loader and CLI/API code to ensure that config files are loaded and saved identically in both runtime and testing.
-  - Refactor as needed to prevent silent overwrites, unwanted defaulting, or schema mismatches.
-  - Update tests to use real config logic, not mocks, and to fail fast on config errors.
-  - Document the audit and refactor in plan.md and architecture_and_maintenance.md.
-
----
 
 ## Basic Features: Status Summary
 

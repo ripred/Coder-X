@@ -16,7 +16,7 @@ def test_set_and_get_server_url(monkeypatch):
     url = "http://localhost:9999"
     client.set_server_url(url)
     assert client.server_url == url
-    assert client.config["mcp_server"] == url
+    assert client.config.mcp_server == url
 
 def test_get_context_and_save_context():
     # Passive integration test with public Obsidian MCP server (read-only)

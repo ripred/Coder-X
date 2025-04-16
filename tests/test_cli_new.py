@@ -35,22 +35,28 @@ def test_config_show_and_set_direct(monkeypatch, tmp_path):
     config = CoderXConfig(
         model="mock-model",
         model_storage_path="/tmp/models",
-        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy").model_dump(),
+        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy"),
         mcp_server="http://localhost:1234",
         history_path="/tmp/history.json"
     )
-    from app.config import save_config
+    from app.config import save_config, load_config
     save_config(config, str(config_path))
     monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
-    result = runner.invoke(cli_entry.app, ["config", "show"])
+    # Debug print
+    print(f"[DEBUG] test_config_show_and_set_direct: config_path={config_path}")
+    loaded = load_config(str(config_path))
+    print(f"[DEBUG] Loaded config: {loaded}")
+    result = runner.invoke(cli_entry.app, ["config", "show", "--config-path", str(config_path)])
+    print(f"[DEBUG] CLI output: {result.output}")
     assert result.exit_code == 0
     assert "mock-model" in result.output
     # Set config
-    result = runner.invoke(cli_entry.app, ["config", "set", "model", "new-model"])
+    result = runner.invoke(cli_entry.app, ["config", "set", "--config-path", str(config_path), "model", "new-model"])
     assert result.exit_code == 0
     assert "success" in result.output
     # Check new value
-    result = runner.invoke(cli_entry.app, ["config", "show"])
+    result = runner.invoke(cli_entry.app, ["config", "show", "--config-path", str(config_path)])
+    print(f"[DEBUG] CLI output: {result.output}")
     assert "new-model" in result.output
 
 def test_config_persistence_file(tmp_path):
@@ -62,14 +68,19 @@ def test_config_persistence_file(tmp_path):
     config = CoderXConfig(
         model="persisted-model",
         model_storage_path="/tmp/models",
-        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy").model_dump(),
+        api_keys=APIKeys(openai="dummy", anthropic="dummy", ollama="dummy"),
         mcp_server="http://localhost:1234",
         history_path="/tmp/history.json"
     )
-    from app.config import save_config
+    from app.config import save_config, load_config
     save_config(config, str(config_path))
     os.environ["CLAUDE_CODE_CONFIG"] = str(config_path)
-    result = runner.invoke(cli_entry.app, ["config", "show"])
+    # Debug print
+    print(f"[DEBUG] test_config_persistence_file: config_path={config_path}")
+    loaded = load_config(str(config_path))
+    print(f"[DEBUG] Loaded config: {loaded}")
+    result = runner.invoke(cli_entry.app, ["config", "show", "--config-path", str(config_path)])
+    print(f"[DEBUG] CLI output: {result.output}")
     assert "persisted-model" in result.output
 
 

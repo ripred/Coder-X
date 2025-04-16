@@ -9,11 +9,11 @@ from .config import load_config
 class MCPClient:
     def __init__(self, config=None):
         self.config = config or load_config()
-        self.server_url = self.config.get("mcp_server")
+        self.server_url = getattr(self.config, "mcp_server", None)
 
     def set_server_url(self, url: str):
         self.server_url = url
-        self.config["mcp_server"] = url
+        self.config.mcp_server = url
         from .config import save_config
         save_config(self.config)
 
