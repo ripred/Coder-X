@@ -20,12 +20,16 @@ This project adheres to a strict workflow discipline to ensure maintainability, 
 
 ## Features
 - CLI and interactive shell (Typer-based)
-- Coder-X CLI backend with CLI commands
-- Configuration management (CLI, prompts, CLI)
-- Model management (local/remote, storage path)
-- Secure shell/file operations with audit
-- User/session management
-- Extensible integrations
+- Powerful configuration management (CLI, prompts, and config files)
+- Model management (local and remote, flexible storage path selection)
+- Secure shell and file operations with full audit trail
+- User and session management with export and clear history
+- Secure CLI/API key encryption and storage
+- Third-party integrations (e.g., GitHub, Ollama, etc.) with token management
+- YAML and JSON config support
+- MCP server integration for advanced workflows
+- Automated testing and high code coverage discipline
+- Extensible plugin and integration architecture
 
 ## Quickstart
 
@@ -83,8 +87,24 @@ pytest
 | `PYTHONPATH`              | (set by tests)                      | Ensures correct module/package import            |
 | `CODER_X_CONFIG`          | `~/.coder_x_config.json`            | Path to JSON config file                         |
 | `CODER_X_HISTORY`         | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CODER_X_KEY`             | `~/.coder_x_key`                    | (Reserved for future use. Not currently used.)   |
+| `CODER_X_KEY`             | `~/.coder_x_key.enc`                | Encrypted CLI/API key file (see below).         |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
+
+### Encrypted CLI/API Key Storage
+
+Coder-X now supports secure encryption of CLI/API keys using industry-standard cryptography:
+- **Encryption:** Uses PBKDF2HMAC key derivation and Fernet (AES) authenticated encryption.
+- **Storage:** Encrypted secrets are stored in a binary file (default: `~/.coder_x_key.enc`).
+- **Passphrase:** You must provide a passphrase (recommended: via environment variable or prompt) to encrypt/decrypt your secret.
+
+**How to Use:**
+- To save a new key: use the CLI or call `encrypt_secret()` from `app/key_encryption.py`, then store the resulting salt and token.
+- To load a key: use `load_encrypted_secret()` and `decrypt_secret()` with your passphrase.
+
+**Security Notes:**
+- Your key is never stored in plain text.
+- If you lose your passphrase, the encrypted key cannot be recovered—you must generate a new one.
+- See `app/key_encryption.py` for code and usage examples.
 
 *Most environment variables are optional; defaults are used if unset.*
 
