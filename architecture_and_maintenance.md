@@ -25,12 +25,14 @@ Coder-X supports advanced customization via environment variables. Defaults are 
 
 | Variable                  | Default                             | Description                                      |
 |---------------------------|-------------------------------------|--------------------------------------------------|
-| `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to the main JSON config file                |
+| `CODER_X_CONFIG`          | `~/.coder_x_config.json`            | Path to the main JSON config file                |
 | `CODER_X_YAML_CONFIG`     | `~/.coder_x_config.yaml`            | Path to YAML config file (if used)               |
 | `HOME`                    | System user home                    | Used for default config/model/history locations   |
-| `CLAUDE_CODE_HISTORY`     | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
+| `CODER_X_HISTORY`         | `~/.coder_x_history.json`           | Path to session history file                     |
+| `CODER_X_KEY (reserved for future use, not currently active)` | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
+
+**Note:** Backward compatibility for `CLAUDE_CODE_*` environment variables is temporary and will be removed in a future release. Please update your configurations to use the `CODER_X_*` prefix.
 
 ---
 

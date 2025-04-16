@@ -6,7 +6,7 @@ from app import config
 def test_config_load_and_save(monkeypatch):
     with tempfile.NamedTemporaryFile(delete=False) as tf:
         path = tf.name
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", path)
+    monkeypatch.setenv("CODER_X_CONFIG", path)
     try:
         from app.config_schema import CoderXConfig
         original = CoderXConfig.model_validate({"model": "test-model", "model_storage_path": "/tmp/models", "api_keys": {"foo": "bar"}, "mcp_server": "http://localhost", "history_path": "/tmp/history.json"})

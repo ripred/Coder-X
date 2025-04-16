@@ -39,7 +39,7 @@ Develop a Python-based, agentic coding assistant modeled after Anthropic's Claud
 
 ---
 
-### Claude Code Parity & Feature Comparison
+### Coder-X Parity & Feature Comparison
 
 **Current Status:**
 - Coder-X implements the core features of Claude Code: interactive CLI, one-off queries, scriptable output, unified configuration, model selection, session/history management, and secure key management.
@@ -272,7 +272,6 @@ All core features (model management, storage, shell integration, config, session
 - [x] User management tests fixed by enforcing singleton state for UserManager
 - [ ] Interactive shell (migrating to new CLI structure, unit tests pending)
 - [ ] Model management
-- [ ] Model storage location selection
 - [x] Key management  
   - Created `app/key_management.py` for secure key storage, retrieval, and removal (with placeholder encryption).
   - **Stub removal required:** All placeholder encryption and stubbed methods must be fully implemented and tested before completion.

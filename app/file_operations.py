@@ -61,7 +61,7 @@ class FileOps:
         # Try to use remote model API for explanation
         try:
             import requests
-            endpoint = os.environ.get("CLAUDE_CODE_MODEL_API", "http://localhost:8000/remote-model/generate")
+            endpoint = os.environ.get("CODER_X_MODEL_API") or os.environ.get("CLAUDE_CODE_MODEL_API") or "http://localhost:8000/remote-model/generate"
             resp = requests.post(endpoint, json={"input": content, "mode": "explain"}, timeout=15)
             if resp.status_code == 200:
                 result = resp.json().get("result")

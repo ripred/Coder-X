@@ -37,7 +37,7 @@ def test_config_show_and_set_direct(monkeypatch, tmp_path):
     )
     from app.config import save_config, load_config
     save_config(config, str(config_path))
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    monkeypatch.setenv("CODER_X_CONFIG", str(config_path))
     # Debug print
     print(f"[DEBUG] test_config_show_and_set_direct: config_path={config_path}")
     loaded = load_config(str(config_path))
@@ -70,7 +70,7 @@ def test_config_persistence_file(tmp_path):
     )
     from app.config import save_config, load_config
     save_config(config, str(config_path))
-    os.environ["CLAUDE_CODE_CONFIG"] = str(config_path)
+    os.environ["CODER_X_CONFIG"] = str(config_path)
     # Debug print
     print(f"[DEBUG] test_config_persistence_file: config_path={config_path}")
     loaded = load_config(str(config_path))

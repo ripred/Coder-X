@@ -77,14 +77,16 @@ pytest
 
 | Variable                  | Default                             | Description                                      |
 |---------------------------|-------------------------------------|--------------------------------------------------|
-| `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to the main JSON config file                |
+| `CODER_X_CONFIG`          | `~/.coder_x_config.json`            | Path to the main JSON config file                |
 | `CODER_X_YAML_CONFIG`     | `~/.coder_x_config.yaml`            | Path to YAML config file (if used)               |
 | `HOME`                    | System user home                    | Used for default config/model/history locations   |
 | `PYTHONPATH`              | (set by tests)                      | Ensures correct module/package import            |
-| `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to JSON config file                         |
-| `CLAUDE_CODE_HISTORY`     | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
+| `CODER_X_CONFIG`          | `~/.coder_x_config.json`            | Path to JSON config file                         |
+| `CODER_X_HISTORY`         | `~/.coder_x_history.json`           | Path to session history file                     |
+| `CODER_X_KEY`             | `~/.coder_x_key`                    | (Reserved for future use. Not currently used.)   |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
+
+*For backward compatibility, the previous `CLAUDE_CODE_*` environment variables are still supported (for config, history, and model API only), but will be removed in a future release.*
 
 *Most environment variables are optional; defaults are used if unset.*
 

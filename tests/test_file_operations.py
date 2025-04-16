@@ -110,7 +110,7 @@ def test_explain_code_env_override(tmp_path, monkeypatch):
         def status_code(self): return 200
     dummy_requests = type("R", (), {"post": staticmethod(lambda url, json, timeout: DummyResp())})
     monkeypatch.setitem(__import__('sys').modules, "requests", dummy_requests)
-    monkeypatch.setenv("CLAUDE_CODE_MODEL_API", "http://custom-endpoint")
+    monkeypatch.setenv("CODER_X_MODEL_API", "http://custom-endpoint")
     result = fo.explain_code(str(file_path))
     assert "from custom endpoint" in result
 

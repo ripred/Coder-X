@@ -8,9 +8,9 @@ from app.config_schema import CoderXConfig
 from pydantic import ValidationError
 
 # Deprecated: for backward compatibility only. Use get_config_path() everywhere else.
-CONFIG_PATH = os.environ.get("CLAUDE_CODE_CONFIG", os.path.expanduser("~/.coder_x_config.json"))
+CONFIG_PATH = os.environ.get("CODER_X_CONFIG") or os.environ.get("CLAUDE_CODE_CONFIG") or os.path.expanduser("~/.coder_x_config.json")
 def get_config_path() -> str:
-    return os.environ.get("CLAUDE_CODE_CONFIG", os.path.expanduser("~/.coder_x_config.json"))
+    return os.environ.get("CODER_X_CONFIG") or os.environ.get("CLAUDE_CODE_CONFIG") or os.path.expanduser("~/.coder_x_config.json")
 
 def load_config(path: Optional[str] = None) -> CoderXConfig:
     """

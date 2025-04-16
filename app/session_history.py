@@ -11,7 +11,7 @@ from .config import load_config, save_config
 class SessionHistory:
     def __init__(self, config=None):
         self.config = config or load_config()
-        self.history_path = getattr(self.config, "history_path", os.path.expanduser("~/.coder_x_history.json"))
+        self.history_path = getattr(self.config, "history_path", os.environ.get("CODER_X_HISTORY") or os.environ.get("CLAUDE_CODE_HISTORY") or os.path.expanduser("~/.coder_x_history.json"))
         if os.path.isdir(self.history_path):
             raise IsADirectoryError(f"History path {self.history_path} is a directory.")
         if not os.path.exists(self.history_path):

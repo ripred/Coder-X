@@ -12,7 +12,7 @@ def test_list_local_models(monkeypatch, tmp_path):
     (model_dir / "llama.bin").write_text("fake model")
     (model_dir / "mistral.gguf").write_text("fake model")
     config_path = tmp_path / "coderx_config.json"
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    monkeypatch.setenv("CODER_X_CONFIG", str(config_path))
     config = CoderXConfig(model_storage_path=str(model_dir))
     save_config(config, str(config_path))
     mm = ModelManager(config)
@@ -23,7 +23,7 @@ def test_list_local_models(monkeypatch, tmp_path):
 def test_set_and_get_active_model(monkeypatch, tmp_path):
     from app.config_schema import CoderXConfig
     config_path = tmp_path / "coderx_config.json"
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    monkeypatch.setenv("CODER_X_CONFIG", str(config_path))
     config = CoderXConfig()
     save_config(config, str(config_path))
     mm = ModelManager(config)
@@ -35,7 +35,7 @@ def test_set_and_get_active_model(monkeypatch, tmp_path):
 def test_set_model_storage_path(monkeypatch, tmp_path):
     from app.config_schema import CoderXConfig
     config_path = tmp_path / "coderx_config.json"
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    monkeypatch.setenv("CODER_X_CONFIG", str(config_path))
     config = CoderXConfig()
     save_config(config, str(config_path))
     mm = ModelManager(config)
@@ -178,7 +178,7 @@ def test_unload_model_ollama_error(monkeypatch):
 def test_set_active_model_invalid(monkeypatch, tmp_path):
     from app.config_schema import CoderXConfig
     config_path = tmp_path / "coderx_config.json"
-    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    monkeypatch.setenv("CODER_X_CONFIG", str(config_path))
     config = CoderXConfig()
     save_config(config, str(config_path))
     mm = ModelManager(config)
