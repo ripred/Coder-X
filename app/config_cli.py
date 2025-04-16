@@ -19,6 +19,7 @@ def show(config_path: Optional[str] = typer.Option(None, help="Path to config fi
         print_json({"success": True, "config": config.model_dump()})
     except Exception as e:
         print_json({"success": False, "error": str(e)})
+        raise typer.Exit(1)
 
 @config_app.command()
 def set(
@@ -42,6 +43,7 @@ def set(
         print_json({"success": True, "config": config.model_dump()})
     except Exception as e:
         print_json({"success": False, "error": str(e)})
+        raise typer.Exit(1)
 
 @config_app.command()
 def unset(
@@ -56,6 +58,7 @@ def unset(
         print_json({"success": True, "config": config.model_dump()})
     except Exception as e:
         print_json({"success": False, "error": str(e)})
+        raise typer.Exit(1)
 
 @config_app.command()
 def setup(config_path: Optional[str] = typer.Option(None, help="Path to config file.")):
@@ -81,3 +84,4 @@ def setup(config_path: Optional[str] = typer.Option(None, help="Path to config f
         print_json({"success": True, "message": "Config saved", "config": config.model_dump()})
     except Exception as e:
         print_json({"success": False, "error": str(e)})
+        raise typer.Exit(1)

@@ -24,10 +24,9 @@
 |---------------------------|-------------------------------------|--------------------------------------------------|
 | `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to the main JSON config file                |
 | `CODER_X_YAML_CONFIG`     | `~/.coder_x_config.yaml`            | Path to YAML config file (if used)               |
-| `CLAUDE_CODE_MODEL_API`   | `http://localhost:8000/remote-model/generate` | Endpoint for remote model API         |
 | `HOME`                    | System user home                    | Used for default config/model/history locations   |
 | `CLAUDE_CODE_HISTORY`     | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for API keys              |
+| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
 These environment variables allow advanced users and deployers to customize configuration, model management, and security. Most are optional and have safe defaults.
@@ -38,15 +37,14 @@ This document provides a detailed, step-by-step breakdown of the architecture, i
 
 ## Table of Contents
 - [Model Management](#model-management)
-- [API Key Management](#api-key-management)
+- [CLI Key Management](#cli-key-management)
 - [MCP Integration](#mcp-integration)
 - [File Operations](#file-operations)
 - [Shell Integration](#shell-integration)
 - [Session/History Management](#sessionhistory-management)
 - [User Management](#user-management)
-- [Feedback and Telemetry](#feedback-and-telemetry)
 - [Third-Party Integrations](#third-party-integrations)
-- [API Endpoints](#api-endpoints)
+- [CLI Endpoints](#cli-endpoints)
 - [CLI/Interactive Shell](#cliinteractive-shell)
 - [Testing](#testing)
 - [Maintenance](#maintenance)
@@ -75,9 +73,9 @@ Handles listing, selecting, loading, and unloading models from a user-defined st
 
 ---
 
-## API Key Management
+## CLI Key Management
 ### Overview
-Securely stores, retrieves, and removes API keys, with placeholder encryption.
+Securely stores, retrieves, and removes CLI keys, with placeholder encryption.
 
 #### Implementation Steps
 - **API Key Functions**: `set_api_key`, `get_api_key`, `remove_api_key` in `app/api_key_management.py`.
@@ -87,7 +85,7 @@ Securely stores, retrieves, and removes API keys, with placeholder encryption.
 
 ## MCP Integration
 ### Overview
-Integrates with Model Context Protocol (MCP) servers for context and memory management.
+Integrates with Model Context Protocol (MCP) for context and memory management.
 
 #### Implementation Steps
 - **MCPClient class**: Handles server URL, context fetch/save in `app/mcp_integration.py`.
@@ -101,7 +99,7 @@ Provides read, write, append, explain, test, and lint operations for files.
 
 #### Implementation Steps
 - **FileOps class**: Implements all file operations in `app/file_operations.py`.
-- **Unit Tests**: `tests/test_file_operations.py` and API tests cover all endpoints and logic.
+- **Unit Tests**: `tests/test_file_operations.py` and CLI tests cover all endpoints and logic.
 
 ---
 
@@ -113,14 +111,12 @@ Executes shell commands securely with an allowlist. Dangerous commands are block
 - **ShellIntegration class**: In `app/shell_integration.py`.
 
 > **Note:** Further improvements to output and user experience for shell integration will be addressed after all basic features are complete.
-- **API**: `/shell/run` endpoint in `app/shell_api.py`.
-- **Unit Tests**: `tests/test_shell_integration.py` and API tests.
+- **Unit Tests**: `tests/test_shell_integration.py` and CLI tests.
 - **User Permission**: System designed to prompt for explicit user approval for dangerous commands (e.g., `rm`).
 - **CLI Workflow**: If the backend responds with a 'not allowed' error, the CLI:
   - Displays a strong security warning and highlights the irreversible nature of dangerous commands.
   - Requires the user to type the full word 'yes' to approve execution. Any other input aborts the command.
   - Logs all dangerous command approvals to `~/.claude_code_dangerous_shell.log` with a timestamp and command for auditability.
-  - If approved, the CLI resends the command with an override flag and highlights the override in the output.
 
 ---
 
@@ -130,8 +126,7 @@ Stores, views, clears, and exports command and conversation history.
 
 #### Implementation Steps
 - **SessionHistory class**: In `app/session_history.py`.
-- **API**: `/history` endpoints in `app/session_history_api.py`.
-- **Unit Tests**: `tests/test_session_history.py` and API tests.
+- **Unit Tests**: `tests/test_session_history.py` and CLI tests.
 
 ---
 
@@ -141,18 +136,7 @@ Displays user info and provides login/logout stubs.
 
 #### Implementation Steps
 - **UserManager class**: In `app/user_management.py`.
-- **API**: `/user` endpoints in `app/user_management_api.py`.
-- **Singleton Pattern**: UserManager is now implemented as a singleton at the API layer to ensure session state (e.g., tokens) persists across requests and tests, enabling correct login/logout behavior.
-- **Unit Tests**: `tests/test_user_management.py` and API tests.
-
----
-
-## Feedback and Telemetry
-### Overview
-(Feature removed)
-
-#### Implementation Steps
-- All feedback and telemetry code, endpoints, and tests have been fully removed as per project plan. No user data is collected or sent.
+- **Unit Tests**: `tests/test_user_management.py` and CLI tests.
 
 ---
 
@@ -162,28 +146,27 @@ Manages connections to external services.
 
 #### Implementation Steps
 - **ThirdPartyIntegration class**: In `app/third_party_integrations.py`.
-- **API**: To be implemented in `app/third_party_integrations_api.py`.
 - **Unit Tests**: `tests/test_third_party_integrations.py`.
 
 ---
 
-## API Endpoints
+## CLI Endpoints
 ### Overview
-All subsystems are exposed via FastAPI endpoints, with a router per subsystem.
+All subsystems are exposed via CLI endpoints, with a router per subsystem.
 
 #### Implementation Steps
-- Each subsystem has a dedicated API router file (e.g., `*_api.py`).
-- Unit/API tests for each endpoint.
+- Each subsystem has a dedicated CLI router file (e.g., `*_api.py`).
+- Unit tests for each endpoint.
 
 ---
 
 ## CLI/Interactive Shell
 ### Overview
-The CLI provides an interactive terminal interface to all backend features, including model management, file operations, shell commands, history, user management, feedback, and integrations.
+The CLI provides an interactive terminal interface to all backend features, including model management, file operations, shell commands, history, user management, and integrations.
 
 #### Implementation Steps
-- **Command Parsing**: The CLI parses user input and maps commands to API calls.
-- **Dangerous Shell Command Prompt**: When a shell command is disallowed by the backend, the CLI prompts the user for permission to proceed. If the user agrees, the command is resent with an override flag (backend support coming soon).
+- **Command Parsing**: The CLI parses user input and maps commands to CLI calls.
+- **Dangerous Shell Command Prompt**: When a shell command is disallowed by the backend, the CLI prompts the user for permission to proceed. If the user agrees, the command is resent with an override flag.
 - **Unit Tests**: CLI tested via subprocess and integration tests in `tests/test_cli.py`.
 
 ---

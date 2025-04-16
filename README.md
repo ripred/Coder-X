@@ -1,6 +1,6 @@
 # Coder-X
 
-A Python Agentic Coding Assistant with CLI and API, supporting configuration management, model management, and secure shell/file operations.
+A Python Agentic Coding Assistant with CLI, supporting configuration management, model management, and secure shell/file operations.
 
 ## Workflow Discipline
 
@@ -12,8 +12,8 @@ This project adheres to a strict workflow discipline to ensure maintainability, 
 
 ## Features
 - CLI and interactive shell (Typer-based)
-- FastAPI backend with REST endpoints
-- Configuration management (CLI, prompts, API)
+- Coder-X CLI backend with CLI commands
+- Configuration management (CLI, prompts, CLI)
 - Model management (local/remote, storage path)
 - Secure shell/file operations with audit
 - User/session management
@@ -26,9 +26,9 @@ This project adheres to a strict workflow discipline to ensure maintainability, 
    pip install -r requirements.txt
    ```
 
-2. **Run the FastAPI backend:**
+2. **Run the Coder-X CLI:**
    ```sh
-   uvicorn app.main:app --reload
+   python app/main.py
    ```
 
 3. **Use the CLI:**
@@ -52,11 +52,11 @@ pytest
 ## Configuration
 - Config is stored in JSON (default: `~/.coder_x_config.json`), validated and managed via a Pydantic V2 schema for safety and extensibility.
 - Model storage path defaults to `~/.coder_x_models`
-- All config options can be managed via robust CLI commands (`show`, `set`, `unset`, `setup`) or API, with all output as structured JSON for scripting and testability.
+- All config options can be managed via robust CLI commands (`show`, `set`, `unset`, `setup`), with all output as structured JSON for scripting and testability.
 - Comprehensive tests ensure config reliability and future extensibility.
 
 ## Model Management
-- List, select, load, and unload models via CLI or API
+- List, select, load, and unload models via CLI
 - Dynamic loading/unloading of local LLMs using Ollama backend:
   - `coder-x model load <model_name>` to download/pull a model
   - `coder-x model unload <model_name>` to remove a model
@@ -71,12 +71,11 @@ pytest
 |---------------------------|-------------------------------------|--------------------------------------------------|
 | `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to the main JSON config file                |
 | `CODER_X_YAML_CONFIG`     | `~/.coder_x_config.yaml`            | Path to YAML config file (if used)               |
-| `CLAUDE_CODE_MODEL_API`   | `http://localhost:8000/remote-model/generate` | Endpoint for remote model API         |
 | `HOME`                    | System user home                    | Used for default config/model/history locations   |
 | `PYTHONPATH`              | (set by tests)                      | Ensures correct module/package import            |
 | `CLAUDE_CODE_CONFIG`      | `~/.coder_x_config.json`            | Path to JSON config file                         |
 | `CLAUDE_CODE_HISTORY`     | `~/.coder_x_history.json`           | Path to session history file                     |
-| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for API keys              |
+| `CLAUDE_CODE_KEY`         | `~/.coder_x_key`                    | Path to encryption key for CLI keys              |
 | `OLLAMA_MODELS_CMD`       | `ollama list`                       | Command to list Ollama models (if used)          |
 
 *Most environment variables are optional; defaults are used if unset.*

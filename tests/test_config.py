@@ -26,3 +26,40 @@ def test_model_storage_path():
     assert config.get_model_storage_path(conf) == "/tmp/models"
     default_conf = CoderXConfig()
     assert config.get_model_storage_path(default_conf) == default_conf.model_storage_path
+
+def test_load_config_missing_file():
+    path = "/tmp/does_not_exist_coderx.json"
+    result = config.load_config(path)
+    from app.config_schema import CoderXConfig
+    assert isinstance(result, CoderXConfig)
+
+def test_load_config_malformed(monkeypatch):
+    with tempfile.NamedTemporaryFile(delete=False) as tf:
+        path = tf.name
+    with open(path, "w") as f:
+        f.write("not json!")
+    try:
+        import pytest
+        with pytest.raises(ValueError):
+            config.load_config(path)
+    finally:
+        os.remove(path)
+
+def test_save_config_permission_error(monkeypatch):
+    from app.config_schema import CoderXConfig
+    conf = CoderXConfig()
+    def fail_open(*a, **kw):
+        raise PermissionError("denied")
+    monkeypatch.setattr("builtins.open", fail_open)
+    import pytest
+    with pytest.raises(PermissionError):
+        config.save_config(conf, "/root/forbidden.json")
+
+def test_load_config_validation_error(tmp_path):
+    # Write a config missing required fields
+    path = tmp_path / "bad.json"
+    with open(path, "w") as f:
+        f.write("{}")
+    result = config.load_config(str(path))
+    from app.config_schema import CoderXConfig
+    assert isinstance(result, CoderXConfig)

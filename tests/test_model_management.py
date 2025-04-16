@@ -1,6 +1,7 @@
 import os
 import tempfile
-from app.model_management import ModelManager
+from app import model_management
+ModelManager = model_management.ModelManager
 from app.config import save_config, load_config
 
 def test_list_local_models(monkeypatch, tmp_path):
@@ -58,6 +59,74 @@ def test_set_model_storage_path_non_writable(tmp_path):
             assert "writable" in str(e) or "permission" in str(e).lower()
         else:
             assert False, "Should raise error for non-writable path"
+
+def test_set_model_storage_path_insufficient_space(tmp_path):
+    mm = ModelManager()
+    new_path = str(tmp_path / "no_space")
+    os.makedirs(new_path)
+    # Simulate <1GB free
+    with mock.patch("shutil.disk_usage", return_value=(10**12, 10**12-500, 500)), \
+         mock.patch("os.access", return_value=True):
+        try:
+            mm.set_model_storage_path(new_path)
+        except Exception as e:
+            assert "Insufficient disk space" in str(e)
+        else:
+            assert False, "Should raise error for insufficient disk space"
+
+def test_set_model_storage_path_usage_error(tmp_path):
+    mm = ModelManager()
+    new_path = str(tmp_path / "err_usage")
+    os.makedirs(new_path)
+    with mock.patch("shutil.disk_usage", side_effect=OSError("fail")), \
+         mock.patch("os.access", return_value=True):
+        try:
+            mm.set_model_storage_path(new_path)
+        except Exception as e:
+            assert "Could not determine disk usage" in str(e)
+        else:
+            assert False, "Should raise error for disk usage failure"
+
+def test_list_local_models_mixed(tmp_path):
+    from app.config_schema import CoderXConfig
+    model_dir = tmp_path / "models"
+    model_dir.mkdir()
+    (model_dir / "llama.bin").write_text("fake model")
+    (model_dir / "README.md").write_text("not a model")
+    (model_dir / "nested").mkdir()
+    config = CoderXConfig(model_storage_path=str(model_dir))
+    mm = ModelManager(config)
+    models = mm.list_local_models()
+    assert "llama.bin" in models
+    assert "nested" in models
+    assert "README.md" not in models
+
+def test_load_model_ollama_error(monkeypatch):
+    mm = ModelManager()
+    def fake_run(*a, **kw):
+        raise Exception("fail")
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert not mm.load_model_ollama("badmodel")
+
+def test_unload_model_ollama_error(monkeypatch):
+    mm = ModelManager()
+    def fake_run(*a, **kw):
+        raise Exception("fail")
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert not mm.unload_model_ollama("badmodel")
+
+def test_set_active_model_invalid(monkeypatch, tmp_path):
+    from app.config_schema import CoderXConfig
+    config_path = tmp_path / "coderx_config.json"
+    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    config = CoderXConfig()
+    save_config(config, str(config_path))
+    mm = ModelManager(config)
+    # Should not raise, just set an arbitrary name
+    mm.set_active_model("")
+    assert mm.get_active_model() == ""
+    mm.set_active_model(None)
+    assert mm.get_active_model() is None
 
 def test_set_model_storage_path_insufficient_space(tmp_path):
     mm = ModelManager()

@@ -61,11 +61,21 @@ def save_config(config: CoderXConfig, path: Optional[str] = None):
         json.dump(config.model_dump(exclude_unset=False), f, indent=2)
 
 def set_config_key(config: CoderXConfig, dotted_key: str, value: Any) -> CoderXConfig:
-    """Set a (possibly nested) config key."""
+    """Set a (possibly nested) config key. Raises ValueError if key is invalid."""
     import copy
     config_dict = copy.deepcopy(config.model_dump())
     keys = dotted_key.split('.')
     d = config_dict
+    # Validate top-level key
+    top_keys = set(CoderXConfig.model_fields.keys())
+    if keys[0] not in top_keys:
+        raise ValueError(f"Invalid config key: {keys[0]}")
+    # Validate nested keys for api_keys
+    if keys[0] == "api_keys" and len(keys) > 1:
+        from app.config_schema import APIKeys
+        api_keys_fields = set(APIKeys.model_fields.keys())
+        if keys[1] not in api_keys_fields:
+            raise ValueError(f"Invalid api_keys subkey: {keys[1]}")
     for k in keys[:-1]:
         if k not in d or not isinstance(d[k], dict):
             d[k] = {}
