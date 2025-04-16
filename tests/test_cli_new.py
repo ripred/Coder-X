@@ -14,13 +14,9 @@ def test_help_command_typer():
     assert "Commands" in result.output
 
 def test_model_list_typer(monkeypatch):
-    class MockResp:
-        def __init__(self, data):
-            self._data = data
-        def json(self):
-            return self._data
-    import requests
-    monkeypatch.setattr(requests, "get", lambda url, **kwargs: MockResp({"models": ["foo", "bar"]}) if "/models" in url else MockResp({}, 404))
+    from app.model_management import ModelManager
+    monkeypatch.setattr(ModelManager, "list_local_models", lambda self: ["foo"])
+    monkeypatch.setattr(ModelManager, "list_ollama_models", lambda self: ["bar"])
     result = runner.invoke(cli_entry.app, ["model", "list"])
     assert result.exit_code == 0
     assert "foo" in result.output

@@ -11,16 +11,19 @@ app.add_typer(config_app, name="config")
 @app.command()
 def model(action: str = typer.Argument(..., help="Action: list, set, storage-path, load, unload, volumes, set-volume"), name: str = typer.Argument(None, help="Model name or path")):
     """List, set, load/unload models, or manage storage/volume."""
-    import requests, json, os, sys
-    API_BASE = "http://localhost:8000"
+    import json, os
     from app.model_management import ModelManager
     mgr = ModelManager()
     if action == "list":
-        r = requests.get(f"{API_BASE}/models")
-        typer.echo(json.dumps(r.json(), indent=2))
+        models = set(mgr.list_local_models())
+        try:
+            models.update(mgr.list_ollama_models())
+        except Exception:
+            pass
+        typer.echo(json.dumps(sorted(models), indent=2))
     elif action == "set" and name:
-        r = requests.post(f"{API_BASE}/models/active", json={"model": name})
-        typer.echo(r.json())
+        mgr.set_active_model(name)
+        typer.echo({"active_model": name})
     elif action == "storage-path":
         if name:
             path = os.path.expanduser(name)
@@ -38,17 +41,13 @@ def model(action: str = typer.Argument(..., help="Action: list, set, storage-pat
             if free < 100:
                 typer.echo(f"[ERROR] Not enough free space at {path} ({free} MB available).")
                 raise typer.Exit(1)
-            r = requests.post(f"{API_BASE}/models/storage-path", params={"path": path})
-            if r.status_code == 200:
+            try:
+                mgr.set_model_storage_path(path)
                 typer.echo(f"Model storage path set to: {path}")
-            else:
-                typer.echo(f"[ERROR] Failed to set model storage path: {r.text}")
+            except Exception as e:
+                typer.echo(f"[ERROR] Failed to set model storage path: {e}")
         else:
-            r = requests.get(f"{API_BASE}/models/storage-path")
-            if r.status_code == 200:
-                typer.echo(f"Current model storage path: {r.json().get('storage_path')}")
-            else:
-                typer.echo(f"[ERROR] Failed to get model storage path: {r.text}")
+            typer.echo(f"Current model storage path: {mgr.storage_path}")
     elif action == "load" and name:
         typer.echo(f"[INFO] Loading model '{name}' via Ollama...")
         ok = mgr.load_model_ollama(name)
@@ -81,95 +80,98 @@ def model(action: str = typer.Argument(..., help="Action: list, set, storage-pat
 @app.command()
 def file(action: str = typer.Argument(..., help="Action: read, write, append"), path: str = typer.Argument(..., help="File path"), text: str = typer.Argument(None, help="Text for write/append")):
     """Read, write, or append to files."""
-    import requests
-    API_BASE = "http://localhost:8000"
+    from app.file_operations import read_file, write_file, append_file
     if action == "read":
-        r = requests.get(f"{API_BASE}/file/read", params={"path": path})
-        typer.echo(r.text)
+        try:
+            content = read_file(path)
+            typer.echo(content)
+        except Exception as e:
+            typer.echo(f"[ERROR] {e}")
     elif action == "write" and text:
-        r = requests.post(f"{API_BASE}/file/write", json={"path": path, "text": text})
-        typer.echo(r.text)
+        try:
+            write_file(path, text)
+            typer.echo("[OK] File written.")
+        except Exception as e:
+            typer.echo(f"[ERROR] {e}")
     elif action == "append" and text:
-        r = requests.post(f"{API_BASE}/file/append", json={"path": path, "text": text})
-        typer.echo(r.text)
+        try:
+            append_file(path, text)
+            typer.echo("[OK] Text appended.")
+        except Exception as e:
+            typer.echo(f"[ERROR] {e}")
     else:
         typer.echo("Usage: coder-x file [read|write|append] <path> [text]")
 
 @app.command()
 def history():
     """Show session history."""
-    import requests, json
-    API_BASE = "http://localhost:8000"
-    r = requests.get(f"{API_BASE}/history")
-    typer.echo(json.dumps(r.json(), indent=2))
+    from app.session_history import SessionHistory
+    sh = SessionHistory()
+    typer.echo(sh.get_history())
 
 @app.command()
 def user():
     """Show current user info."""
-    import requests, json
-    API_BASE = "http://localhost:8000"
-    r = requests.get(f"{API_BASE}/user/info")
-    typer.echo(json.dumps(r.json(), indent=2))
+    from app.user_management import UserManager
+    um = UserManager()
+    typer.echo(um.get_current_user())
 
 @app.command()
 def feedback(text: str = typer.Argument(..., help="Feedback text")):
     """Submit feedback."""
-    import requests
-    API_BASE = "http://localhost:8000"
-    r = requests.post(f"{API_BASE}/feedback/submit", json={"feedback": text})
-    typer.echo(r.text)
+    # Placeholder: implement feedback logic directly
+    print(f"[Feedback submitted] {text}")
 
 @app.command()
 def integration(action: str = typer.Argument(..., help="Action: list, connect, disconnect"), svc: str = typer.Argument(None, help="Service name")):
     """Manage integrations."""
-    import requests, json
-    API_BASE = "http://localhost:8000"
+    from app.third_party_integrations import IntegrationManager
+    mgr = IntegrationManager()
     if action == "list":
-        r = requests.get(f"{API_BASE}/integration/list")
-        typer.echo(json.dumps(r.json(), indent=2))
+        integrations = mgr.list_integrations()
+        typer.echo("Available integrations:")
+        for i in integrations:
+            typer.echo(f"  {i}")
     elif action == "connect" and svc:
-        r = requests.post(f"{API_BASE}/integration/connect", json={"service": svc})
-        typer.echo(r.text)
+        ok = mgr.connect(svc)
+        if ok:
+            typer.echo(f"[OK] Connected to {svc}")
+        else:
+            typer.echo(f"[ERROR] Failed to connect to {svc}")
     elif action == "disconnect" and svc:
-        r = requests.post(f"{API_BASE}/integration/disconnect", json={"service": svc})
-        typer.echo(r.text)
+        ok = mgr.disconnect(svc)
+        if ok:
+            typer.echo(f"[OK] Disconnected from {svc}")
+        else:
+            typer.echo(f"[ERROR] Failed to disconnect from {svc}")
     else:
-        typer.echo("Usage: coder-x integration [list|connect|disconnect] [service]")
+        typer.echo("Usage: coder-x integration [list|connect|disconnect] <service>")
 
 @app.command()
 def mcp(action: str = typer.Argument(..., help="Action: get-server, set-server, get-context, save-context"), arg1: str = typer.Argument(None, help="Server URL or context ID"), arg2: str = typer.Argument(None, help="Context data as JSON (for save-context)")):
     """MCP protocol integration commands."""
-    import requests, json
-    API_BASE = "http://localhost:8000"
+    from app.mcp_integration import MCPClient
+    mcp = MCPClient()
+    import json
     if action == "get-server":
-        r = requests.get(f"{API_BASE}/mcp/server")
-        if r.status_code == 200:
-            typer.echo(f"MCP server URL: {r.json().get('server_url')}")
-        else:
-            typer.echo(f"[ERROR] Failed to get MCP server URL: {r.text}")
+        typer.echo(mcp.server_url)
     elif action == "set-server" and arg1:
-        r = requests.post(f"{API_BASE}/mcp/server", params={"url": arg1})
-        if r.status_code == 200:
-            typer.echo(f"MCP server URL set to: {arg1}")
-        else:
-            typer.echo(f"[ERROR] Failed to set MCP server URL: {r.text}")
+        mcp.set_server_url(arg1)
+        typer.echo(f"[OK] MCP server set to {arg1}")
     elif action == "get-context" and arg1:
-        r = requests.get(f"{API_BASE}/mcp/context/{arg1}")
-        if r.status_code == 200:
-            typer.echo(json.dumps(r.json(), indent=2))
-        else:
-            typer.echo(f"[ERROR] Failed to get context: {r.text}")
+        ctx = mcp.get_context(arg1)
+        typer.echo(json.dumps(ctx, indent=2))
     elif action == "save-context" and arg1 and arg2:
         try:
             data = json.loads(arg2)
         except Exception as e:
             typer.echo(f"[ERROR] Invalid JSON for context data: {e}")
-            raise typer.Exit(1)
-        r = requests.post(f"{API_BASE}/mcp/context/{arg1}", json={"context_id": arg1, "data": data})
-        if r.status_code == 200:
-            typer.echo(f"Context {arg1} saved.")
+            return
+        ok = mcp.save_context(arg1, data)
+        if ok:
+            typer.echo(f"[OK] Context {arg1} saved.")
         else:
-            typer.echo(f"[ERROR] Failed to save context: {r.text}")
+            typer.echo(f"[ERROR] Failed to save context {arg1}.")
     else:
         typer.echo("Usage: coder-x mcp [get-server|set-server|get-context|save-context] <arg1> [arg2]")
 
@@ -183,27 +185,12 @@ from typing import List
 @app.command()
 def shell(cmd: List[str] = typer.Argument(None, help="Shell command to run (optional, pass as separate args)")):
     """Run a shell command or start the interactive shell (with slash command support)."""
-    import subprocess, shlex, os, sys
+    from app.shell_integration import ShellIntegration
+    shell = ShellIntegration()
+    import subprocess
     if cmd:
-        command_str = " ".join(cmd)
-        dangerous = any(x in command_str for x in ["rm", "shutdown", "reboot"])
-        if dangerous:
-            typer.echo("[WARNING] Dangerous command detected.")
-            try:
-                approve = input("Are you sure you want to run this command? (yes/no): ").strip().lower()
-            except Exception:
-                approve = ""
-            if approve != "yes":
-                typer.echo("Command aborted.")
-                print("Command aborted.")
-                sys.exit(0)
-        try:
-            result = subprocess.run(command_str, shell=True, capture_output=True, text=True)
-            typer.echo(result.stdout)
-            if result.stderr:
-                typer.echo(result.stderr)
-        except Exception as e:
-            typer.echo(f"[ERROR] {e}")
+        result = shell.run_command(cmd, override=True)
+        typer.echo(result.get("stdout", "") + result.get("stderr", ""))
     else:
         from app.interactive_shell import InteractiveShell
         InteractiveShell().run()

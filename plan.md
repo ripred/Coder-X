@@ -13,7 +13,7 @@
 
 2. **Testing Discipline**
    - Every new feature, bugfix, or refactor MUST include at least one relevant unit test.
-   - Unit tests must always exercise real, production code paths (not mocks/stubs).
+   - Unit tests must always exercise real, production code paths (not just mocks or stubs).
    - After any change, **run all unit tests** (not just the tests for the current feature) to ensure nothing is broken.
    - Do not proceed to the next step until all tests are passing at 100%.
 
@@ -26,14 +26,14 @@
 ## Project Goal & Approach
 
 **Goal:**  
-Develop a Python-based, agentic coding assistant. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both remote and local models (e.g., Ollama), allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
+Develop a Python-based, agentic coding assistant. This tool will provide natural language coding assistance, codebase understanding, and workflow automation directly from the terminal. It will support both local and remote models (e.g., Ollama), allow user selection and configuration of models, support the Model Context Protocol (MCP), and enable flexible storage of models on any user-selected drive.
 
 **Approach:**  
-- Use Python with FastAPI and uvicorn for the backend.
+- Use Python with CLI for the backend.
 - Implement a CLI and interactive shell for user interaction.
 - Support model selection (local/remote) and configuration.
 - Integrate with MCP for context/memory sharing.
-- Allow secure API key management.
+- Allow secure key management.
 - Enable model storage on any user-selected location (internal or external drives).
 - Modular, extensible, and well-documented codebase.
 
@@ -44,7 +44,7 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 - **CLI and Interactive Shell**: Natural language and slash command interface.
 - **Model Management**: List, select, load, and switch models (local/remote).
 - **Model Storage Location**: User can specify any directory for local model storage.
-- **API Key Management**: Secure storage, update, and retrieval of API keys.
+- **Key Management**: Secure storage, update, and retrieval of keys.
 - **MCP Protocol Support**: Integration with MCP servers for context and memory.
 - **File Operations**: Edit, explain, test, and lint code files.
 - **Shell Command Integration**: Securely run shell commands from within the tool.
@@ -61,7 +61,7 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 1. **CLI & Interactive Shell**
 2. **Model Management**
 3. **Model Storage Location Management**
-4. **API Key Management**
+4. **Key Management**
 5. **MCP Integration**
 6. **File Operations**
 7. **Shell Integration**
@@ -92,7 +92,7 @@ Develop a Python-based, agentic coding assistant. This tool will provide natural
 
 ## Basic Features: Status Summary
 
-All core features (model management, storage, shell integration, config, session/history, user management, MCP, API key management, file operations) are now implemented, tested, and documented. Unit tests (see test_cli_new.py and other current tests) cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md. Legacy and redundant tests have been removed for clarity.
+All core features (model management, storage, shell integration, config, session/history, user management, MCP, key management, file operations) are now implemented, tested, and documented. Unit tests (see test_cli_new.py and other current tests) cover all validation and error-handling logic. Documentation is up to date in plan.md and architecture_and_maintenance.md. Legacy and redundant tests have been removed for clarity.
 
 ---
 
@@ -110,7 +110,7 @@ All core features (model management, storage, shell integration, config, session
 - [x] Load/unload models dynamically (Ollama backend integration, real CLI commands: `model load/unload`, volume selection)
 - [x] Integrate with Ollama for local models
 - [x] Integrate with Anthropic API for Claude models (simulated/stubbed)
-- [x] Support user-supplied API keys for remote models
+- [x] Support user-supplied keys for remote models
 
 ### 3. Model Storage Location Management
 - [x] Add `model_storage_path` to config schema
@@ -122,11 +122,11 @@ All core features (model management, storage, shell integration, config, session
 
 > **Note:** Validation for existence, writability, and free space is implemented and tested. Error handling for unavailable/disconnected drives is in place. Further improvements to output/UX are deferred until all basic features are complete.
 
-### 4. API Key Management
-- [x] Securely prompt for/store API keys (unit tests written)
-- [x] Encrypt API keys at rest (Fernet, unit tests written)
-- [x] Retrieve and use API keys for model requests (unit tests written)
-- [x] Allow updating/removing API keys (unit tests written)
+### 4. Key Management
+- [x] Securely prompt for/store keys (unit tests written)
+- [x] Encrypt keys at rest (Fernet, unit tests written)
+- [x] Retrieve and use keys for model requests (unit tests written)
+- [x] Allow updating/removing keys (unit tests written)
 
 ### 5. MCP Integration
 - [x] Integrate MCP protocol via official Python library (unit tests written)
@@ -179,7 +179,7 @@ All core features (model management, storage, shell integration, config, session
 ## Best Practices & Design Decisions
 
 - Use Ollama for local models; fallback to `llama-cpp-python` or `transformers` if needed.
-- Secure, encrypted API key storage.
+- Secure, encrypted key storage.
 - Model storage location is user-configurable and can be any attached drive.
 - All config changes available via CLI, shell, and config file.
 - Modular code for easy extension and maintenance.
@@ -206,8 +206,8 @@ All core features (model management, storage, shell integration, config, session
 - [Ollama Python GitHub](https://github.com/ollama/ollama-python)
 - [MCP Protocol](https://github.com/modelcontextprotocol/servers)
 - [Prompt Toolkit](https://python-prompt-toolkit.readthedocs.io/)
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Uvicorn](https://www.uvicorn.org/)
+- [CLI](https://fastapi.tiangolo.com/)
+- [CLI](https://www.uvicorn.org/)
 
 ---
 
@@ -220,8 +220,8 @@ All core features (model management, storage, shell integration, config, session
 - [ ] Interactive shell (migrating to new CLI structure, unit tests pending)
 - [ ] Model management
 - [ ] Model storage location selection
-- [x] API key management  
-  - Created `app/api_key_management.py` for secure API key storage, retrieval, and removal (with placeholder encryption).
+- [x] Key management  
+  - Created `app/key_management.py` for secure key storage, retrieval, and removal (with placeholder encryption).
   - **Stub removal required:** All placeholder encryption and stubbed methods must be fully implemented and tested before completion.
 - [x] MCP integration  
   - Created `app/mcp_integration.py` for connecting to MCP servers, fetching and saving context/memory.

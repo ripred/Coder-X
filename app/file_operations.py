@@ -9,14 +9,27 @@ File operations for Claude Code Python Assistant
 import os
 from typing import Optional
 
+# Module-level functions for direct import (for CLI and tests)
+def read_file(filepath: str) -> Optional[str]:
+    return FileOps().read_file(filepath)
+
+def write_file(filepath: str, content: str) -> bool:
+    return FileOps().write_file(filepath, content)
+
+def append_file(filepath: str, content: str) -> bool:
+    return FileOps().append_file(filepath, content)
+
 class FileOps:
     def __init__(self):
         pass
 
     def read_file(self, filepath: str) -> Optional[str]:
         if os.path.exists(filepath):
-            with open(filepath, 'r', encoding='utf-8') as f:
-                return f.read()
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    return f.read()
+            except OSError:
+                return None
         return None
 
     def write_file(self, filepath: str, content: str) -> bool:

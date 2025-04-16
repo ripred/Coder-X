@@ -39,7 +39,51 @@ def test_set_nested_key():
     result = runner.invoke(app, ["config", "set", "api_keys.openai", "sk-test", "--config-path", path])
     assert result.exit_code == 0
     data = json.loads(result.output)
+    assert data["success"] is True
     assert data["config"]["api_keys"]["openai"] == "sk-test"
+    os.remove(path)
+
+def test_set_invalid_key():
+    path = tmp_config_path()
+    result = runner.invoke(app, ["config", "set", "notarealkey", "val", "--config-path", path])
+    assert result.exit_code != 0
+    assert "error" in result.output.lower() or "invalid" in result.output.lower()
+    os.remove(path)
+
+def test_set_invalid_value():
+    path = tmp_config_path()
+    # Set a value that should fail validation (e.g., model_storage_path as int)
+    result = runner.invoke(app, ["config", "set", "model_storage_path", "123", "--config-path", path])
+    # Accepts as string, but let's try a nested key with invalid type
+    result2 = runner.invoke(app, ["config", "set", "api_keys", "123", "--config-path", path])
+    assert result2.exit_code != 0 or "error" in result2.output.lower()
+    os.remove(path)
+
+def test_missing_config_file():
+    path = "/tmp/does_not_exist_coderx_cli.json"
+    result = runner.invoke(app, ["config", "show", "--config-path", path])
+    # Should show default config, not error
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert data["success"] is True
+
+def test_malformed_config_file():
+    path = tmp_config_path()
+    with open(path, "w") as f:
+        f.write("not json!")
+    result = runner.invoke(app, ["config", "show", "--config-path", path])
+    assert result.exit_code != 0
+    assert "error" in result.output.lower() or "fail" in result.output.lower()
+    os.remove(path)
+
+def test_permission_error_on_save(monkeypatch):
+    path = tmp_config_path()
+    def fail_open(*a, **kw):
+        raise PermissionError("denied")
+    monkeypatch.setattr("builtins.open", fail_open)
+    result = runner.invoke(app, ["config", "set", "model", "foo", "--config-path", path])
+    assert result.exit_code != 0
+    assert "denied" in result.output.lower() or "permission" in result.output.lower()
     os.remove(path)
 
 def test_unset_key():

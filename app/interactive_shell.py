@@ -7,10 +7,13 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.history import FileHistory
 import os
 import sys
-import requests
 import json
+from app.model_management import ModelManager
+from app.file_operations import read_file, write_file, append_file
+from app.config import load_config, save_config, set_config_key
+from app.session_history import SessionHistory
+from app.user_management import UserManager
 
-API_BASE = "http://localhost:8000"
 HISTORY_FILE = os.path.expanduser("~/.coder_x_shell_history")
 
 COMMANDS = [
@@ -49,34 +52,46 @@ class InteractiveShell:
             for c in COMMANDS:
                 print(f"  {c}")
         elif cmd == "/model-list":
-            r = requests.get(f"{API_BASE}/models")
-            print(json.dumps(r.json(), indent=2))
+            mm = ModelManager()
+            local = mm.list_local_models()
+            ollama = mm.list_ollama_models()
+            print(json.dumps({"local": local, "ollama": ollama}, indent=2))
         elif cmd == "/model-set" and len(args) > 1:
-            r = requests.post(f"{API_BASE}/models/active", json={"model": args[1]})
-            print(r.json())
+            mm = ModelManager()
+            mm.set_active_model(args[1])
+            print(f"Active model set to: {args[1]}")
         elif cmd == "/model-storage-path":
+            mm = ModelManager()
             if len(args) > 1:
                 path = os.path.expanduser(args[1])
-                r = requests.post(f"{API_BASE}/models/storage-path", params={"path": path})
-                print(r.text)
+                try:
+                    mm.set_model_storage_path(path)
+                    print(f"Model storage path set to: {path}")
+                except Exception as e:
+                    print(f"[ERROR] {e}")
             else:
-                r = requests.get(f"{API_BASE}/models/storage-path")
-                print(r.text)
+                print(f"Current model storage path: {mm.storage_path}")
         elif cmd == "/config-show":
-            r = requests.get(f"{API_BASE}/config")
-            print(json.dumps(r.json(), indent=2))
+            conf = load_config()
+            print(json.dumps(conf.model_dump(), indent=2))
         elif cmd == "/config-set" and len(args) > 2:
             key, value = args[1], args[2]
-            r = requests.get(f"{API_BASE}/config")
-            conf = r.json()
-            conf[key] = value
+            conf = load_config()
+            conf = set_config_key(conf, key, value)
+            save_config(conf)
             print(f"Set {key} = {value}")
         elif cmd == "/file-read" and len(args) > 1:
-            r = requests.get(f"{API_BASE}/file/read", params={"path": args[1]})
-            print(r.text)
+            content = read_file(args[1])
+            if content is not None:
+                print(content)
+            else:
+                print(f"[ERROR] Could not read file: {args[1]}")
         elif cmd == "/file-write" and len(args) > 2:
-            r = requests.post(f"{API_BASE}/file/write", json={"path": args[1], "text": ' '.join(args[2:])})
-            print(r.text)
+            ok = write_file(args[1], ' '.join(args[2:]))
+            if ok:
+                print("[OK] File written.")
+            else:
+                print(f"[ERROR] Could not write file: {args[1]}")
         elif cmd == "/shell" and len(args) > 1:
             import subprocess
             command_str = ' '.join(args[1:])

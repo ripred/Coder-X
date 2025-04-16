@@ -2,14 +2,13 @@
 CLI/Interactive shell for Coder-X
 """
 import sys
-import requests
+
 import readline
 import json
 
 import os
 IS_TEST_MODE = os.environ.get("CODER_X_TEST_MODE", "0") == "1"
 
-API_BASE = "http://localhost:8000"
 
 HELP = """
 Coder-X CLI
@@ -37,28 +36,16 @@ Commands:
 
 def trust_prompt():
     # No graphical prompt; just a plain text trust confirmation
-    if IS_TEST_MODE:
-        return
+    if os.environ.get("CODER_X_TEST_MODE", "0") == "1":
+        return  # In test mode, do nothing and never prompt
     folder = os.getcwd()
     print(f"Do you trust the files in this folder?\n{folder}\nType 'yes' to proceed, anything else to exit.")
     resp = input("> ").strip().lower()
     if resp != "yes":
         print("Exiting for safety.")
         sys.exit(0)
+    # Optionally: graphical/panel prompt for interactive mode (if ever used)
 
-    folder = os.getcwd()
-    panel = Panel(
-        Align.center(
-            f"[bold yellow]Do you trust the files in this folder?[/bold yellow]\n[white]{folder}[/white]\n\n[bold green]> Yes, proceed[/bold green]\n[bold]  No, exit[/bold]",
-            vertical="middle"
-        ),
-        title="[cyan]Trust Prompt",
-        subtitle="Enter to confirm · Esc to exit",
-        border_style="bright_magenta",
-        padding=(1, 4),
-        width=80
-    )
-    console.print(panel)
     try:
         import termios, tty
         fd = sys.stdin.fileno()
@@ -85,14 +72,19 @@ def run_command_line(line):
     elif args[0] == "help":
         return HELP
     elif args[0] == "model" and len(args) > 1:
+        from app.model_management import ModelManager
+        mm = ModelManager()
         if args[1] == "list":
-            r = requests.get(f"{API_BASE}/models")
-            return json.dumps(r.json(), indent=2)
+            local_models = mm.list_local_models()
+            ollama_models = mm.list_ollama_models()
+            return json.dumps({"local": local_models, "ollama": ollama_models}, indent=2)
         elif args[1] == "set" and len(args) > 2:
-            r = requests.post(f"{API_BASE}/models/active", json={"model": args[2]})
-            return str(r.json())
+            mm.set_active_model(args[2])
+            return f"Active model set to {args[2]}"
     elif args[0] == "config" and len(args) > 1:
         import sys
+        from app.config import load_config, save_config, get_config_path
+        from app.config_schema import CoderXConfig
         def safe_input(prompt):
             if sys.stdin.isatty():
                 return input(prompt)
@@ -100,16 +92,16 @@ def run_command_line(line):
                 # Read a single line from stdin (for test harness)
                 print(prompt, end="", flush=True)
                 return sys.stdin.readline().rstrip("\n")
+        config_path = get_config_path()
         if args[1] == "setup":
             try:
-                r = requests.get(f"{API_BASE}/config")
-                conf = r.json()
+                conf = load_config(config_path)
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
-            model = safe_input(f"Model (current: {conf.get('model', None)}): ").strip()
+                return f"[ERROR] Could not load config: {e}"
+            model = safe_input(f"Model (current: {conf.model}): ").strip()
             if model:
-                conf['model'] = model
-            storage_path = safe_input(f"Model storage path (current: {conf.get('model_storage_path', None)}): ").strip()
+                conf.model = model
+            storage_path = safe_input(f"Model storage path (current: {conf.model_storage_path}): ").strip()
             if storage_path:
                 import os
                 if not os.path.exists(storage_path):
@@ -120,40 +112,37 @@ def run_command_line(line):
                         setup_msg = f"[ERROR] Could not create directory: {e}\n"
                 else:
                     setup_msg = ""
-                conf['model_storage_path'] = storage_path
+                conf.model_storage_path = storage_path
             else:
                 setup_msg = ""
             api_keys_msg = "\nAPI Keys setup (leave blank to skip)\n"
-            if 'api_keys' not in conf:
-                conf['api_keys'] = {}
+            if not conf.api_keys:
+                conf.api_keys = {}
             for provider in ['openai', 'anthropic', 'ollama']:
-                key = safe_input(f"API key for {provider} (current: {conf['api_keys'].get(provider, None)}): ").strip()
+                key = safe_input(f"API key for {provider} (current: {getattr(conf.api_keys, provider, None)}): ").strip()
                 if key:
-                    conf['api_keys'][provider] = key
-            mcp_server = safe_input(f"MCP server endpoint (current: {conf.get('mcp_server', None)}): ").strip()
+                    conf.api_keys[provider] = key
+            mcp_server = safe_input(f"MCP server endpoint (current: {conf.mcp_server}): ").strip()
             if mcp_server:
-                conf['mcp_server'] = mcp_server
+                conf.mcp_server = mcp_server
             try:
-                r = requests.post(f"{API_BASE}/config", json=conf)
+                save_config(conf, config_path)
                 result = "Config saved\n"
-                result += json.dumps(r.json() if r.text else {}, indent=2) + "\n"
-                r2 = requests.get(f"{API_BASE}/config")
-                result += json.dumps(r2.json() if r2.text else {}, indent=2)
+                result += json.dumps(conf.model_dump(), indent=2) + "\n"
                 return setup_msg + api_keys_msg + result
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
+                return f"[ERROR] Could not save config: {e}"
         if args[1] == "show":
             try:
-                r = requests.get(f"{API_BASE}/config")
-                return json.dumps(r.json() if r.text else {}, indent=2)
+                conf = load_config(config_path)
+                return json.dumps(conf.model_dump(), indent=2)
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
+                return f"[ERROR] Could not load config: {e}"
         elif args[1] == "set" and len(args) > 2:
             try:
-                r = requests.get(f"{API_BASE}/config")
-                conf = r.json()
+                conf = load_config(config_path)
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
+                return f"[ERROR] Could not load config: {e}"
             key = args[2]
             if len(args) > 3:
                 value = args[3]
@@ -167,40 +156,43 @@ def run_command_line(line):
                 except: pass
                 return val
             value = convert(value)
-            def set_nested(d, dotted_key, val):
+            def set_nested(obj, dotted_key, val):
                 keys = dotted_key.split('.')
+                d = obj.model_dump()
                 for k in keys[:-1]:
                     if k not in d or not isinstance(d[k], dict):
                         d[k] = {}
                     d = d[k]
                 d[keys[-1]] = val
-            set_nested(conf, key, value)
+                # Re-validate as CoderXConfig
+                return CoderXConfig.model_validate(obj.model_dump(exclude_unset=False))
+            conf = set_nested(conf, key, value)
             try:
-                r = requests.post(f"{API_BASE}/config", json=conf)
-                result = json.dumps(r.json() if r.text else {}, indent=2) + "\n"
-                r2 = requests.get(f"{API_BASE}/config")
-                result += json.dumps(r2.json() if r2.text else {}, indent=2)
-                return result
+                save_config(conf, config_path)
+                return json.dumps(conf.model_dump(), indent=2)
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
+                return f"[ERROR] Could not save config: {e}"
         elif args[1] == "unset" and len(args) > 2:
             try:
-                r = requests.get(f"{API_BASE}/config")
-                conf = r.json()
+                conf = load_config(config_path)
             except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
+                return f"[ERROR] Could not load config: {e}"
             key = args[2]
-            def unset_nested(d, dotted_key):
+            def unset_nested(obj, dotted_key):
                 keys = dotted_key.split('.')
+                d = obj.model_dump()
                 for k in keys[:-1]:
                     if k not in d or not isinstance(d[k], dict):
                         return False
                     d = d[k]
-                return d.pop(keys[-1], None) is not None
-            unset_nested(conf, key)
+                d.pop(keys[-1], None)
+                return CoderXConfig.model_validate(obj.model_dump(exclude_unset=False))
+            conf = unset_nested(conf, key)
             try:
-                r = requests.post(f"{API_BASE}/config", json=conf)
-                return json.dumps(r.json() if r.text else {}, indent=2)
+                save_config(conf, config_path)
+                return json.dumps(conf.model_dump(), indent=2)
+            except Exception as e:
+                return f"[ERROR] Could not save config: {e}"
             except Exception as e:
                 return f"[ERROR] Could not connect to backend: {e}"
     # Fallback to original main loop for other commands or unknowns
