@@ -7,7 +7,7 @@ Model management for Claude Code Python Assistant
 import os
 from typing import List, Optional
 import subprocess
-from .config import get_model_storage_path, load_config
+from .config import get_model_storage_path, load_config, set_config_key
 
 OLLAMA_MODELS_CMD = ["ollama", "list"]
 
@@ -52,16 +52,16 @@ class ModelManager:
                 raise OSError(f"Insufficient disk space at '{path}'. At least 1GB free is required.")
         except Exception as e:
             raise OSError(f"Could not determine disk usage for '{path}': {e}")
-        self.config['model_storage_path'] = path
+        self.config = set_config_key(self.config, "model_storage_path", path)
         from .config import save_config
         save_config(self.config)
         self.storage_path = path
 
     def get_active_model(self) -> Optional[str]:
-        return self.config.get("model")
+        return getattr(self.config, "model", None)
 
     def set_active_model(self, model_name: str):
-        self.config["model"] = model_name
+        self.config = set_config_key(self.config, "model", model_name)
         from .config import save_config
         save_config(self.config)
 

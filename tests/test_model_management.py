@@ -3,30 +3,41 @@ import tempfile
 from app.model_management import ModelManager
 from app.config import save_config, load_config
 
-def test_list_local_models(tmp_path):
+def test_list_local_models(monkeypatch, tmp_path):
+    from app.config_schema import CoderXConfig
     # Create fake model files
     model_dir = tmp_path / "models"
     model_dir.mkdir()
     (model_dir / "llama.bin").write_text("fake model")
     (model_dir / "mistral.gguf").write_text("fake model")
-    config = load_config()
-    config["model_storage_path"] = str(model_dir)
-    save_config(config)
+    config_path = tmp_path / "coderx_config.json"
+    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    config = CoderXConfig(model_storage_path=str(model_dir))
+    save_config(config, str(config_path))
     mm = ModelManager(config)
     models = mm.list_local_models()
     assert "llama.bin" in models
     assert "mistral.gguf" in models
 
-def test_set_and_get_active_model(tmp_path):
-    config = load_config()
+def test_set_and_get_active_model(monkeypatch, tmp_path):
+    from app.config_schema import CoderXConfig
+    config_path = tmp_path / "coderx_config.json"
+    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    config = CoderXConfig()
+    save_config(config, str(config_path))
     mm = ModelManager(config)
     mm.set_active_model("llama3")
     assert mm.get_active_model() == "llama3"
     mm.set_active_model("mistral")
     assert mm.get_active_model() == "mistral"
 
-def test_set_model_storage_path(tmp_path):
-    mm = ModelManager()
+def test_set_model_storage_path(monkeypatch, tmp_path):
+    from app.config_schema import CoderXConfig
+    config_path = tmp_path / "coderx_config.json"
+    monkeypatch.setenv("CLAUDE_CODE_CONFIG", str(config_path))
+    config = CoderXConfig()
+    save_config(config, str(config_path))
+    mm = ModelManager(config)
     new_path = str(tmp_path / "new_models")
     mm.set_model_storage_path(new_path)
     assert os.path.exists(new_path)

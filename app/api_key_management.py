@@ -9,6 +9,7 @@ import os
 import json
 from typing import Optional
 from .config import load_config, save_config
+from .config_schema import CoderXConfig
 from cryptography.fernet import Fernet
 
 FERNET_KEY_FILE = os.path.expanduser("~/.coder_x_key")
@@ -26,12 +27,20 @@ fernet = Fernet(key)
 def set_api_key(service: str, api_key: str):
     config = load_config()
     encrypted = fernet.encrypt(api_key.encode()).decode()
-    config['api_keys'][service] = encrypted
+    if hasattr(config, "api_keys") and hasattr(config.api_keys, service):
+        setattr(config.api_keys, service, encrypted)
+    else:
+        # fallback for dynamic keys
+        d = config.model_dump()
+        if "api_keys" not in d:
+            d["api_keys"] = {}
+        d["api_keys"][service] = encrypted
+        config = CoderXConfig.model_validate(d)
     save_config(config)
 
 def get_api_key(service: str) -> Optional[str]:
     config = load_config()
-    enc = config['api_keys'].get(service)
+    enc = getattr(config.api_keys, service, None)
     if enc:
         try:
             return fernet.decrypt(enc.encode()).decode()
@@ -41,6 +50,12 @@ def get_api_key(service: str) -> Optional[str]:
 
 def remove_api_key(service: str):
     config = load_config()
-    if service in config['api_keys']:
-        del config['api_keys'][service]
+    if hasattr(config.api_keys, service):
+        setattr(config.api_keys, service, None)
         save_config(config)
+    else:
+        d = config.model_dump()
+        if "api_keys" in d and service in d["api_keys"]:
+            del d["api_keys"][service]
+            config = CoderXConfig.model_validate(d)
+            save_config(config)

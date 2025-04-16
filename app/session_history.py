@@ -11,7 +11,7 @@ from .config import load_config, save_config
 class SessionHistory:
     def __init__(self, config=None):
         self.config = config or load_config()
-        self.history_path = self.config.get("history_path")
+        self.history_path = getattr(self.config, "history_path", os.path.expanduser("~/.coder_x_history.json"))
         if not os.path.exists(self.history_path):
             with open(self.history_path, "w") as f:
                 json.dump([], f)

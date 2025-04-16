@@ -6,6 +6,8 @@ class APIKeys(BaseModel):
     openai: Optional[str] = None
     anthropic: Optional[str] = None
     ollama: Optional[str] = None
+    
+    model_config = {"extra": "allow"}
 
 class CoderXConfig(BaseModel):
     model: Optional[str] = None
