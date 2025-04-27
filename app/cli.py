@@ -193,8 +193,6 @@ def run_command_line(line):
                 return json.dumps(conf.model_dump(), indent=2)
             except Exception as e:
                 return f"[ERROR] Could not save config: {e}"
-            except Exception as e:
-                return f"[ERROR] Could not connect to backend: {e}"
     # Fallback to original main loop for other commands or unknowns
     return "Unknown command. Type 'help' for available commands."
 
@@ -222,7 +220,6 @@ def main():
             if output:
                 print(output, flush=True)
         return
-    trust_prompt()
     history = []
     while True:
         try:
@@ -232,6 +229,9 @@ def main():
             break
         if not line:
             continue
+        if line.lower() == "exit":
+            print("Exiting Coder-X CLI.")
+            break
         output = run_command_line(line)
         if output:
             print(output, flush=True)
