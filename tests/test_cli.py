@@ -56,7 +56,7 @@ def test_run_command_line_config_show(monkeypatch):
     dummy_conf = CoderXConfig(model="mock")
     monkeypatch.setattr("app.config.load_config", lambda path=None: dummy_conf)
     result = cli.run_command_line("config show")
-    assert "mock" in result
+    assert "Stored values are not printed" in result
 
 # Test 'config set' command with backend mock and edge case
 def test_run_command_line_config_set(monkeypatch):
@@ -71,7 +71,7 @@ def test_run_command_line_config_set(monkeypatch):
     # Patch model_validate to always return a config with model="new"
     monkeypatch.setattr(CoderXConfig, "model_validate", staticmethod(lambda data: CoderXConfig(model="new")))
     result = cli.run_command_line("config set model new")
-    assert "new" in result
+    assert "Stored values are not printed" in result
 
 # Test 'config unset' command with backend mock
 def test_run_command_line_config_unset(monkeypatch):
