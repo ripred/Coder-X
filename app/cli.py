@@ -89,9 +89,11 @@ def print_output(output):
     try:
         parsed = json.loads(text)
     except Exception:
-        print(text, flush=True)
+        sys.stdout.write(text + "\n")
+        sys.stdout.flush()
         return
-    print(json.dumps(redact_sensitive_values(parsed), indent=2), flush=True)
+    sys.stdout.write(json.dumps(redact_sensitive_values(parsed), indent=2) + "\n")
+    sys.stdout.flush()
 
 def run_command_line(line):
     args = line.split()
