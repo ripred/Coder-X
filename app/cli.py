@@ -81,7 +81,13 @@ def redact_sensitive_values(value, sensitive_context=False):
 
 
 def redacted_config_json(config):
-    return json.dumps(redact_sensitive_values(config.model_dump()), indent=2)
+    return json.dumps({
+        "model": config.model,
+        "model_storage_path": config.model_storage_path,
+        "api_keys": "[redacted]",
+        "mcp_server": config.mcp_server,
+        "history_path": config.history_path,
+    }, indent=2)
 
 
 def print_output(output):
