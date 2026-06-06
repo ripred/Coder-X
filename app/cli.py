@@ -100,20 +100,20 @@ def run_command_line(line):
         if args[1] == "setup":
             try:
                 conf = load_config(config_path)
-            except Exception as e:
-                return f"[ERROR] Could not load config: {e}"
-            model = safe_input(f"Model (current: {conf.model}): ").strip()
+            except Exception:
+                return "[ERROR] Could not load config."
+            model = safe_input("Model: ").strip()
             if model:
                 conf.model = model
-            storage_path = safe_input(f"Model storage path (current: {conf.model_storage_path}): ").strip()
+            storage_path = safe_input("Model storage path: ").strip()
             if storage_path:
                 import os
                 if not os.path.exists(storage_path):
                     try:
                         os.makedirs(storage_path, exist_ok=True)
-                        setup_msg = f"Created directory: {storage_path}\n"
-                    except Exception as e:
-                        setup_msg = f"[ERROR] Could not create directory: {e}\n"
+                        setup_msg = "Created model storage directory.\n"
+                    except Exception:
+                        setup_msg = "[ERROR] Could not create model storage directory.\n"
                 else:
                     setup_msg = ""
                 conf.model_storage_path = storage_path
@@ -128,25 +128,25 @@ def run_command_line(line):
                 key = safe_input(f"API key for {provider} (current: {current_label}): ").strip()
                 if key:
                     conf.api_keys[provider] = key
-            mcp_server = safe_input(f"MCP server endpoint (current: {conf.mcp_server}): ").strip()
+            mcp_server = safe_input("MCP server endpoint: ").strip()
             if mcp_server:
                 conf.mcp_server = mcp_server
             try:
                 save_config(conf, config_path)
                 return setup_msg + api_keys_msg + "Config saved. Stored values are not printed."
-            except Exception as e:
-                return f"[ERROR] Could not save config: {e}"
+            except Exception:
+                return "[ERROR] Could not save config."
         if args[1] == "show":
             try:
                 load_config(config_path)
                 return "Config loaded. Stored values are not printed."
-            except Exception as e:
-                return f"[ERROR] Could not load config: {e}"
+            except Exception:
+                return "[ERROR] Could not load config."
         elif args[1] == "set" and len(args) > 2:
             try:
                 conf = load_config(config_path)
-            except Exception as e:
-                return f"[ERROR] Could not load config: {e}"
+            except Exception:
+                return "[ERROR] Could not load config."
             key = args[2]
             if len(args) > 3:
                 value = args[3]
@@ -174,13 +174,13 @@ def run_command_line(line):
             try:
                 save_config(conf, config_path)
                 return "Config updated. Stored values are not printed."
-            except Exception as e:
-                return f"[ERROR] Could not save config: {e}"
+            except Exception:
+                return "[ERROR] Could not save config."
         elif args[1] == "unset" and len(args) > 2:
             try:
                 conf = load_config(config_path)
-            except Exception as e:
-                return f"[ERROR] Could not load config: {e}"
+            except Exception:
+                return "[ERROR] Could not load config."
             key = args[2]
             def unset_nested(obj, dotted_key):
                 keys = dotted_key.split('.')
@@ -195,8 +195,8 @@ def run_command_line(line):
             try:
                 save_config(conf, config_path)
                 return "Config updated. Stored values are not printed."
-            except Exception as e:
-                return f"[ERROR] Could not save config: {e}"
+            except Exception:
+                return "[ERROR] Could not save config."
     # Fallback to original main loop for other commands or unknowns
     return "Unknown command. Type 'help' for available commands."
 
