@@ -9,6 +9,8 @@ import json
 import os
 IS_TEST_MODE = os.environ.get("CODER_X_TEST_MODE", "0") == "1"
 
+SENSITIVE_CONFIG_KEYS = {"api_keys", "token", "secret", "password", "api_key"}
+
 
 HELP = """
 Coder-X CLI
@@ -61,6 +63,35 @@ def trust_prompt():
                 sys.exit(0)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+
+def redact_sensitive_values(value, sensitive_context=False):
+    if isinstance(value, dict):
+        redacted = {}
+        for key, nested in value.items():
+            key_text = str(key).lower()
+            nested_sensitive = sensitive_context or key_text in SENSITIVE_CONFIG_KEYS or "token" in key_text or "secret" in key_text or "password" in key_text
+            redacted[key] = redact_sensitive_values(nested, nested_sensitive)
+        return redacted
+    if isinstance(value, list):
+        return [redact_sensitive_values(item, sensitive_context) for item in value]
+    if sensitive_context and value not in (None, ""):
+        return "[REDACTED]"
+    return value
+
+
+def redacted_config_json(config):
+    return json.dumps(redact_sensitive_values(config.model_dump()), indent=2)
+
+
+def print_output(output):
+    text = str(output)
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        print(text, flush=True)
+        return
+    print(json.dumps(redact_sensitive_values(parsed), indent=2), flush=True)
 
 def run_command_line(line):
     args = line.split()
@@ -119,7 +150,9 @@ def run_command_line(line):
             if not conf.api_keys:
                 conf.api_keys = {}
             for provider in ['openai', 'anthropic', 'ollama']:
-                key = safe_input(f"API key for {provider} (current: {getattr(conf.api_keys, provider, None)}): ").strip()
+                current_key = getattr(conf.api_keys, provider, None)
+                current_label = "[set]" if current_key else ""
+                key = safe_input(f"API key for {provider} (current: {current_label}): ").strip()
                 if key:
                     conf.api_keys[provider] = key
             mcp_server = safe_input(f"MCP server endpoint (current: {conf.mcp_server}): ").strip()
@@ -128,14 +161,14 @@ def run_command_line(line):
             try:
                 save_config(conf, config_path)
                 result = "Config saved\n"
-                result += json.dumps(conf.model_dump(), indent=2) + "\n"
+                result += redacted_config_json(conf) + "\n"
                 return setup_msg + api_keys_msg + result
             except Exception as e:
                 return f"[ERROR] Could not save config: {e}"
         if args[1] == "show":
             try:
                 conf = load_config(config_path)
-                return json.dumps(conf.model_dump(), indent=2)
+                return redacted_config_json(conf)
             except Exception as e:
                 return f"[ERROR] Could not load config: {e}"
         elif args[1] == "set" and len(args) > 2:
@@ -169,7 +202,7 @@ def run_command_line(line):
             conf = set_nested(conf, key, value)
             try:
                 save_config(conf, config_path)
-                return json.dumps(conf.model_dump(), indent=2)
+                return redacted_config_json(conf)
             except Exception as e:
                 return f"[ERROR] Could not save config: {e}"
         elif args[1] == "unset" and len(args) > 2:
@@ -190,7 +223,7 @@ def run_command_line(line):
             conf = unset_nested(conf, key)
             try:
                 save_config(conf, config_path)
-                return json.dumps(conf.model_dump(), indent=2)
+                return redacted_config_json(conf)
             except Exception as e:
                 return f"[ERROR] Could not save config: {e}"
     # Fallback to original main loop for other commands or unknowns
@@ -203,14 +236,14 @@ def main():
         command = " ".join(sys.argv[1:])
         output = run_command_line(command)
         if output:
-            print(output, flush=True)
+            print_output(output)
         return
     # Single-command mode for test harness or automation
     single_command = os.environ.get("CODER_X_CLI_COMMAND")
     if IS_TEST_MODE and single_command:
         output = run_command_line(single_command)
         if output:
-            print(output, flush=True)
+            print_output(output)
         return
     # If stdin is not a TTY (e.g., piped input), read one line and execute as command
     if not sys.stdin.isatty():
@@ -218,7 +251,7 @@ def main():
         if line:
             output = run_command_line(line)
             if output:
-                print(output, flush=True)
+                print_output(output)
         return
     history = []
     while True:
@@ -234,7 +267,7 @@ def main():
             break
         output = run_command_line(line)
         if output:
-            print(output, flush=True)
+            print_output(output)
 
 if __name__ == "__main__":
     main()

@@ -34,9 +34,9 @@ def test_write_unwritable_location(monkeypatch):
     monkeypatch.setattr("builtins.open", lambda *a, **kw: (_ for _ in ()).throw(PermissionError("denied")))
     assert not fo.write_file("/root/forbidden.txt", "data")
 
-def test_append_to_nonexistent_file():
+def test_append_to_nonexistent_file(tmp_path):
     fo = FileOps()
-    path = tempfile.mktemp()
+    path = str(tmp_path / "append-target.txt")
     try:
         assert fo.append_file(path, "data")
         assert fo.read_file(path) == "data"
