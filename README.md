@@ -1,6 +1,5 @@
 # Coder-X Python Agentic Coding Assistant
 
-[![JSON check](https://github.com/ripred/Coder-X/actions/workflows/jsoncheck.yml/badge.svg)](https://github.com/ripred/Coder-X/actions/workflows/jsoncheck.yml)
 [![License](https://flat.badgen.net/github/license/ripred/Coder-X)](https://github.com/ripred/Coder-X/blob/main/LICENSE)
 [![Stars](https://flat.badgen.net/github/stars/ripred/Coder-X)](https://github.com/ripred/Coder-X/stargazers)
 [![Forks](https://flat.badgen.net/github/forks/ripred/Coder-X)](https://github.com/ripred/Coder-X/network/members)
